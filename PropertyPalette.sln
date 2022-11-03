@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32616.157
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PropertyPalette", "PropertyPalette.vcxproj", "{24C5EFAC-A5FC-4235-9DCF-976D7AA951C6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug 24|x64 = Debug 24|x64
+		Debug 25|x64 = Debug 25|x64
+		Debug 26|x64 = Debug 26|x64
+		Release 24|x64 = Release 24|x64
+		Release 25|x64 = Release 25|x64
+		Release 26|x64 = Release 26|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{24C5EFAC-A5FC-4235-9DCF-976D7AA951C6}.Debug 24|x64.ActiveCfg = Debug 24|x64
+		{24C5EFAC-A5FC-4235-9DCF-976D7AA951C6}.Debug 24|x64.ActiveCfg = Debug 24|x64
+		{24C5EFAC-A5FC-4235-9DCF-976D7AA951C6}.Debug 24|x64.Build.0 = Debug 24|x64
+		{24C5EFAC-A5FC-4235-9DCF-976D7AA951C6}.Debug 25|x64.ActiveCfg = Debug 25|x64
+		{24C5EFAC-A5FC-4235-9DCF-976D7AA951C6}.Debug 25|x64.Build.0 = Debug 25|x64
+		{24C5EFAC-A5FC-4235-9DCF-976D7AA951C6}.Debug 26|x64.ActiveCfg = Debug 26|x64
+		{24C5EFAC-A5FC-4235-9DCF-976D7AA951C6}.Debug 26|x64.Build.0 = Debug 26|x64
+		{24C5EFAC-A5FC-4235-9DCF-976D7AA951C6}.Release 24|x64.ActiveCfg = Release 24|x64
+		{24C5EFAC-A5FC-4235-9DCF-976D7AA951C6}.Release 24|x64.Build.0 = Release 24|x64
+		{24C5EFAC-A5FC-4235-9DCF-976D7AA951C6}.Release 25|x64.ActiveCfg = Release 25|x64
+		{24C5EFAC-A5FC-4235-9DCF-976D7AA951C6}.Release 25|x64.Build.0 = Release 25|x64
+		{24C5EFAC-A5FC-4235-9DCF-976D7AA951C6}.Release 26|x64.ActiveCfg = Release 26|x64
+		{24C5EFAC-A5FC-4235-9DCF-976D7AA951C6}.Release 26|x64.Build.0 = Release 26|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6B584CFD-003F-4C53-9135-537300076E90}
+	EndGlobalSection
+EndGlobal

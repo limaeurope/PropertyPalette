@@ -1,0 +1,34 @@
+﻿/* *****************************************************************************
+// Localizable resource description for the Element Test Add-On
+// ****************************************************************************/
+
+
+'STR#' 32000 "Add-on Name and Description" {
+/* [  1] */		"PropertyPalette"
+/* [  2] */		"Add-on; Shows/edits properties of selected objects"
+}
+
+
+'STR#' 32506 "PropertyPalette" {
+/* [   ] */		"LIMA"
+/* [   ] */		"PropertyPalette"
+/* [  4] */		"PropertyPalette..."
+}
+
+/* Table data */
+'STR#' 32603 "PropertyPalette" {
+/* [  1] */			"Number of user objects"
+}
+
+'GDLG'	32400	Palette | close			 40   40   490 248  "Properties" {
+/* [  1] */ Button				380  214   100  24  LargePlain "Close"
+/* [  2] */ PopupControl         0   0   50  24  24 5
+/* [  3] */ SingleSelList		 10   10   470 200  LargePlain PartialItems  HVScroll  24
+}
+
+'DLGH'  32400  DLG_32500_Fill_Settings {
+ 1	""							Button_0
+ 2	""							PopupControl_0
+ 3	""							SingleSelList_0
+}
+
