@@ -235,6 +235,8 @@
   <ItemGroup>
     <ClCompile Include="Src\$(ProjectName).cpp" />
     <ClCompile Include="Src\APICommon.c" />
+    <ClCompile Include="Src\Property.cpp" />
+    <ClCompile Include="Src\S_DisplayedProperty.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="RINT\$(ProjectName).grc">
@@ -301,7 +303,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\APICommon.h" />
+    <ClInclude Include="Src\Property.h" />
     <ClInclude Include="Src\PropertyPalette.h" />
+    <ClInclude Include="Src\S_DisplayedProperty.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="RFIX.win\PropertyPalette.rc2" />
+    <None Include="RINT\PropertyPalette.grc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

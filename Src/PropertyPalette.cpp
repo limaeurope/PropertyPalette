@@ -16,6 +16,9 @@
 #include	"LibXL/libxl.h"
 #include	"DGFileDialog.hpp"
 
+#include	"Property.h"
+#include	"S_DisplayedProperty.h"
+
 using namespace std;
 
 // ---------------------------------- Types ------------------------------------
@@ -35,10 +38,43 @@ static bool					isPopupInitialized = false;
 enum {
 	Button_0 = 1,
 	PopupControl_0,
+	TextEdit_0,
+	RealEdit_0,
+	AngleEdit_0,
+	LengthEdit_0,
+	AreaEdit_0,
+	VolumeEdit_0,
 	SingleSelList_0,
 };
 
+typedef enum {
+	PSM_Union,
+	PSM_Intersection,
+	PSM_LastAdded,
+} propertySelectMode;
 
+
+struct S_PropertyGroup : API_PropertyGroup {
+	GS::Array<API_Guid> propertieS;
+	S_PropertyGroup(API_PropertyGroup& i_group) : API_PropertyGroup(i_group) {};
+};
+
+
+void AddOrUpdateGroup(GS::HashTable<API_Guid, S_PropertyGroup>& i_groupS, API_Property& i_prop)
+{
+	if (!i_groupS.ContainsKey(i_prop.definition.groupGuid))
+	{
+		API_PropertyGroup group;
+		group.guid = i_prop.definition.groupGuid;
+
+		GSErrCode err = ACAPI_Property_GetPropertyGroup(group);
+
+		i_groupS.Add(i_prop.definition.groupGuid, S_PropertyGroup(group));
+	}
+
+	if (!i_groupS[i_prop.definition.groupGuid].propertieS.Contains(i_prop.definition.guid))
+		i_groupS[i_prop.definition.groupGuid].propertieS.Push(i_prop.definition.guid);
+}
 
 
 // -----------------------------------------------------------------------------
@@ -46,42 +82,92 @@ enum {
 //
 //  prints the recently selected element
 // -----------------------------------------------------------------------------
-static GSErrCode __ACENV_CALL	SelectionChangeHandlerProc(const API_Neig* selElemNeig)
+static GSErrCode __ACENV_CALL SelectionChangeHandlerProc(const API_Neig* selElemNeig)
 {
 	GSErrCode            err;
 	API_SelectionInfo    selectionInfo;
-	//API_Elem_Head        tElemHead;
 	GS::Array<API_Neig>  selNeigs;
+	GS::Array<API_PropertyDefinition> propertyDefinitionS;
+	GS::Array<API_Property> propertieS;
+
+	GS::HashTable<API_Guid, S_PropertyGroup> groupS;
+	GS::HashTable< API_Guid, S_DisplayedProperty> collectedPropertieS;
+
+	bool isFirstElement = true;
 
 	err = ACAPI_Selection_Get(&selectionInfo, &selNeigs, true);
 	BMKillHandle((GSHandle*)&selectionInfo.marquee.coords);
 	if (err == APIERR_NOSEL)
 		err = NoError;
 
-	for (const API_Neig& selNeig : selNeigs) 
+	propertySelectMode psm = PSM_Intersection;
+
+	for (const API_Neig& selNeig : selNeigs)
 	{
 		GS::Array<GS::Pair<API_Guid, API_Guid>> systemItemPairs;
+		err = ACAPI_Element_GetPropertyDefinitions(selNeig.guid, API_PropertyDefinitionFilter_UserDefined, propertyDefinitionS);
+		err = ACAPI_Element_GetPropertyValues(selNeig.guid, propertyDefinitionS, propertieS);
 
-		err = ACAPI_Element_GetClassificationItems(selNeig.guid, systemItemPairs);
-
-		DGListDeleteItem(32400, SingleSelList_0, DG_ALL_ITEMS);
-
-		for (auto& sys : systemItemPairs)
+		if (isFirstElement)
 		{
-			API_ClassificationSystem system;
-			API_ClassificationItem item;
-			system.guid = sys.first;
-			item.guid = sys.second;
+			for (auto& prop : propertieS)
+			{
+				collectedPropertieS.Add(prop.definition.guid, S_DisplayedProperty(prop));
 
-			err = ACAPI_Classification_GetClassificationSystem(system);
-			err = ACAPI_Classification_GetClassificationItem(item);
+				AddOrUpdateGroup(groupS, prop);
+			}
+
+			isFirstElement = false;
+		}
+		else
+		{
+			for (auto& prop : propertieS)
+			{
+				if (collectedPropertieS.ContainsKey(prop.definition.guid))
+				{
+					collectedPropertieS[prop.definition.guid].addExample(prop);
+
+					AddOrUpdateGroup(groupS, prop);
+				}
+				else
+					switch (psm)
+					{
+					case PSM_Intersection:
+						break;
+					case PSM_Union:
+					case PSM_LastAdded:
+						collectedPropertieS.Add(prop.definition.guid, S_DisplayedProperty(prop));
+
+						AddOrUpdateGroup(groupS, prop);
+
+						break;
+					}
+			}
+		}
+	}
+
+	DGListDeleteItem(32400, SingleSelList_0, DG_ALL_ITEMS);
+
+	for (auto& group : groupS)
+	{
+		DGListInsertItem(32400, SingleSelList_0, DG_LIST_BOTTOM);
+
+		DGListSetTabItemText(32400, SingleSelList_0, DG_LIST_BOTTOM, 1, group.value->name);
+		DGListSetItemBackgroundColor(32400, SingleSelList_0, DG_LIST_BOTTOM, 0xd8d8, 0xd8d8, 0xd8d8);
+
+		for (auto& propGuid : group.value->propertieS)
+		{
+			auto& prop = collectedPropertieS[propGuid];
 
 			DGListInsertItem(32400, SingleSelList_0, DG_LIST_BOTTOM);
 
-			DGListSetTabItemText(32400, SingleSelList_0, DG_LIST_BOTTOM, 1, APIGuid2GSGuid(system.guid).ToString());
-			DGListSetTabItemText(32400, SingleSelList_0, DG_LIST_BOTTOM, 2, system.name);
+			DGListSetTabItemText(32400, SingleSelList_0, DG_LIST_BOTTOM, 1, prop.definition.name);
+			DGListSetTabItemText(32400, SingleSelList_0, DG_LIST_BOTTOM, 2, prop.toUniString());
 		}
 	}
+
+
+	isFirstElement = false;
 
 	return NoError;
 }
@@ -127,7 +213,7 @@ static short DGCALLBACK CntlDlgCallBack(short message, short dialID, short item,
 		}
 		case SingleSelList_0:
 		{
-			DGListSetDialItemOnTabField(32400, SingleSelList_0, 3, 2);
+			DGListSetDialItemOnTabField(32400, SingleSelList_0, 2, 2);
 
 			break;
 		}
@@ -160,11 +246,17 @@ void Do_ShowPropertyPalette()
 
 		DGListSetTabFieldCount(32400, SingleSelList_0, 3);
 
-		DGListSetTabFieldData(32400, SingleSelList_0, 1, 0, 100, DG_IS_LEFT, DG_IS_TRUNCEND, true, true);
-		DGListSetTabFieldData(32400, SingleSelList_0, 2, 100, 350, DG_IS_LEFT, DG_IS_TRUNCEND, true, true);
-		DGListSetTabFieldData(32400, SingleSelList_0, 3, 350, 450, DG_IS_LEFT, DG_IS_TRUNCEND, true, true);
+		DGListSetTabFieldData(32400, SingleSelList_0, 1, 0, 350, DG_IS_LEFT, DG_IS_TRUNCEND, true, true);
+		DGListSetTabFieldData(32400, SingleSelList_0, 2, 350, 450, DG_IS_LEFT, DG_IS_TRUNCEND, true, true);
 
 		DGHideItem(32400, PopupControl_0);
+		DGHideItem(32400, TextEdit_0);
+		DGHideItem(32400, RealEdit_0);
+		DGHideItem(32400, AngleEdit_0);
+		DGHideItem(32400, LengthEdit_0);
+		DGHideItem(32400, AreaEdit_0);
+		DGHideItem(32400, VolumeEdit_0);
+
 		DGListSetItemHeight(32400, SingleSelList_0, 28);
 
 		isPopupInitialized = true;
@@ -179,7 +271,7 @@ void Do_ShowPropertyPalette()
 
 GSErrCode __ACENV_CALL ClassificationCopier (const API_MenuParams *menuParams)
 {
-	return ACAPI_CallUndoableCommand ("Property Palettte",
+	return ACAPI_CallUndoableCommand ("Property Palette",
 		[&] () -> GSErrCode {
 			switch (menuParams->menuItemRef.itemIndex) {
 				case 1:		Do_ShowPropertyPalette();			break;

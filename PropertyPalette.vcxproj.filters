@@ -3,10 +3,14 @@
   <ItemGroup>
     <ClCompile Include="Src\$(ProjectName).cpp" />
     <ClCompile Include="Src\APICommon.c" />
+    <ClCompile Include="Src\Property.cpp" />
+    <ClCompile Include="Src\S_DisplayedProperty.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\APICommon.h" />
     <ClInclude Include="Src\PropertyPalette.h" />
+    <ClInclude Include="Src\Property.h" />
+    <ClInclude Include="Src\S_DisplayedProperty.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="$(ACDevKitModules)\DGLib\Win\DGImp.lib">
@@ -35,12 +39,6 @@
     </Library>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="RFIX.WIN\$(ProjectName).rc2">
-      <Filter>Resources</Filter>
-    </CustomBuild>
-    <CustomBuild Include="RINT\$(ProjectName).grc">
-      <Filter>Resources</Filter>
-    </CustomBuild>
     <CustomBuild Include="RFIX\$(ProjectName)Fix.grc">
       <Filter>Resources</Filter>
     </CustomBuild>
@@ -52,5 +50,13 @@
     <Filter Include="Resources">
       <UniqueIdentifier>{866c48ce-85a4-4fd1-af81-5679ee035586}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="RFIX.win\PropertyPalette.rc2">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="RINT\PropertyPalette.grc">
+      <Filter>Resources</Filter>
+    </None>
   </ItemGroup>
 </Project>

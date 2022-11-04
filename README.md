@@ -1,2 +1,2 @@
-# ClassificationCopier
+# PropertyPalette
 
