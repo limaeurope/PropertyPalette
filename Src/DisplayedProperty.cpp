@@ -1,7 +1,8 @@
-﻿#include "S_DisplayedProperty.h"
+﻿#include "DisplayedProperty.hpp"
 
 
-void S_DisplayedProperty::addExample(API_Property& i_prop)
+void DisplayedProperty::addExample(const API_Property& i_prop, const API_Guid& i_guidObj)
+//Reset property if values are different
 {
 	switch (definition.collectionType)
 	{
@@ -15,7 +16,7 @@ void S_DisplayedProperty::addExample(API_Property& i_prop)
 			if (value.singleVariant.variant.intValue != i_prop.value.singleVariant.variant.intValue)
 			{
 				value.singleVariant.variant.intValue = 0;
-				m_isValuesEqual = false;
+				m_areAllValuesEqual = false;
 			}
 		}
 		case API_PropertyRealValueType:
@@ -23,7 +24,7 @@ void S_DisplayedProperty::addExample(API_Property& i_prop)
 			if (value.singleVariant.variant.doubleValue != i_prop.value.singleVariant.variant.doubleValue)
 			{
 				value.singleVariant.variant.doubleValue = 0.0;
-				m_isValuesEqual = false;
+				m_areAllValuesEqual = false;
 			}
 		}
 		case API_PropertyBooleanValueType:
@@ -31,7 +32,7 @@ void S_DisplayedProperty::addExample(API_Property& i_prop)
 			if (value.singleVariant.variant.boolValue != i_prop.value.singleVariant.variant.boolValue)
 			{
 				value.singleVariant.variant.boolValue = false;
-				m_isValuesEqual = false;
+				m_areAllValuesEqual = false;
 			}
 		}
 		case API_PropertyStringValueType:
@@ -39,7 +40,7 @@ void S_DisplayedProperty::addExample(API_Property& i_prop)
 			if (value.singleVariant.variant.uniStringValue != i_prop.value.singleVariant.variant.uniStringValue)
 			{
 				value.singleVariant.variant.uniStringValue = "";
-				m_isValuesEqual = false;
+				m_areAllValuesEqual = false;
 			}
 		}
 		}	}
@@ -54,10 +55,11 @@ void S_DisplayedProperty::addExample(API_Property& i_prop)
 	}
 	}
 
-	propertieS.Push(i_prop.definition.guid);
+	representedPropertieS.Push(i_prop.definition.guid);
+	representedObjectS.Push(i_guidObj);
 }
 
-GS::UniString S_DisplayedProperty::_toUniString(API_Variant i_variant)
+GS::UniString DisplayedProperty::_toUniString(API_Variant i_variant)
 {
 	switch (definition.valueType)
 	{
@@ -81,10 +83,10 @@ GS::UniString S_DisplayedProperty::_toUniString(API_Variant i_variant)
 	return GS::UniString("");
 }
 
-GS::UniString S_DisplayedProperty::toUniString()
+GS::UniString DisplayedProperty::toUniString()
 {
 	{
-		if (!m_isValuesEqual)
+		if (!m_areAllValuesEqual)
 			return "<Multiple values>";
 
 		switch (definition.collectionType)
@@ -112,5 +114,85 @@ GS::UniString S_DisplayedProperty::toUniString()
 	}
 
 	return GS::UniString("");
+}
+
+void DisplayedProperty::operator=(const GS::UniString i_value)
+{
+	GSErrCode err;
+
+	this->value.singleVariant.variant.uniStringValue = i_value;
+
+	for (auto objGuid : representedObjectS)
+		err = ACAPI_Element_SetProperty(objGuid, *this);
+}
+
+void DisplayedProperty::operator=(const double i_value)
+{
+	GSErrCode err;
+
+	this->value.singleVariant.variant.doubleValue = i_value;
+
+	for (auto objGuid : representedObjectS)
+		err = ACAPI_Element_SetProperty(objGuid, *this);
+}
+
+void DisplayedProperty::operator=(const int i_value)
+{
+	GSErrCode err;
+
+	this->value.singleVariant.variant.intValue = i_value;
+
+	for (auto objGuid : representedObjectS)
+		err = ACAPI_Element_SetProperty(objGuid, *this);
+}
+
+DisplayedProperty::DisplayedProperty(const API_Property& i_prop, const API_Guid& i_guidObj)
+	: API_Property	(i_prop) 
+{
+	switch (definition.collectionType)
+	{
+	case API_PropertySingleCollectionType:
+	case API_PropertySingleChoiceEnumerationCollectionType:
+	{
+		switch (definition.valueType)
+		{
+		case API_PropertyIntegerValueType:
+		{
+			m_onTabType = IntEdit_0;
+			break;
+		}
+		case API_PropertyRealValueType:
+		{
+			m_onTabType = RealEdit_0;
+			break;
+		}
+		case API_PropertyBooleanValueType:
+		{
+			m_onTabType = CheckBox_0;
+			break;
+		}
+		case API_PropertyStringValueType:
+		{
+			m_onTabType = TextEdit_0;
+			break;
+		}
+		default:
+			m_onTabType = TextEdit_0;
+			break;
+		}
+		break;
+	}
+	case API_PropertyListCollectionType:
+	case API_PropertyMultipleChoiceEnumerationCollectionType:
+	{
+		m_onTabType = PopupControl_0;
+		break;
+	}
+	default:
+		m_onTabType = TextEdit_0;
+	}
+
+	representedPropertieS.Push(i_prop.definition.guid);
+	representedObjectS.Push(i_guidObj);
 }
 

@@ -233,10 +233,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Data\SettingsSingleton.cpp" />
     <ClCompile Include="Src\$(ProjectName).cpp" />
     <ClCompile Include="Src\APICommon.c" />
     <ClCompile Include="Src\Property.cpp" />
-    <ClCompile Include="Src\S_DisplayedProperty.cpp" />
+    <ClCompile Include="Src\DisplayedProperty.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="RINT\$(ProjectName).grc">
@@ -302,14 +303,13 @@
     </Library>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Data\SettingsSingleton.hpp" />
     <ClInclude Include="Src\APICommon.h" />
+    <ClInclude Include="Src\Enums\OnTabTypes.hpp" />
+    <ClInclude Include="Src\Enums\PropertySelectMode.hpp" />
     <ClInclude Include="Src\Property.h" />
     <ClInclude Include="Src\PropertyPalette.h" />
-    <ClInclude Include="Src\S_DisplayedProperty.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="RFIX.win\PropertyPalette.rc2" />
-    <None Include="RINT\PropertyPalette.grc" />
+    <ClInclude Include="Src\DisplayedProperty.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

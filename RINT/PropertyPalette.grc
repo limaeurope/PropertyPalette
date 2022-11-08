@@ -22,14 +22,16 @@
 
 'GDLG'	32400	Palette | close			 40   40   490 248  "Properties" {
 /* [  1] */ Button				380  214   100  24  LargePlain "Close"
-/* [  2] */ PopupControl          0    0    50  24  24 5
-/* [  3] */ TextEdit	          0    0    50  24  LargePlain 256
-/* [  4] */ RealEdit	          0    0    50  24  LargePlain "0" "999"
-/* [  5] */ AngleEdit         	  0    0    50  24  LargePlain "0" "999"
-/* [  6] */ LengthEdit        	  0    0    50  24  LargePlain "0" "999"
-/* [  7] */ AreaEdit          	  0    0    50  24  LargePlain "0" "999"
-/* [  8] */ VolumeEdit            0    0    50  24  LargePlain "0" "999"
-/* [  9] */ SingleSelList		 10   10   470 200  LargePlain PartialItems  HVScroll  24
+/* [  2] */ PopupControl          0    0   100  24  24 5
+/* [  3] */ TextEdit	          0    0   100  24  LargePlain 256
+/* [  4] */ RealEdit	          0    0   100  24  LargePlain "0" "999"
+/* [  5] */ AngleEdit         	  0    0   100  24  LargePlain "0" "999"
+/* [  6] */ LengthEdit        	  0    0   100  24  LargePlain "0" "999"
+/* [  7] */ AreaEdit          	  0    0   100  24  LargePlain "0" "999"
+/* [  8] */ VolumeEdit            0    0   100  24  LargePlain "0" "999"
+/* [  9] */ IntEdit				  0    0   100  24  LargePlain "0" "999"
+/* [ 10] */ CheckBox         	  0    0   100  24  LargePlain ""
+/* [ 11] */ SingleSelList		 10   10   470 200  LargePlain PartialItems  HVScroll  24
 }
 
 'DLGH'  32400  DLG_32500_Fill_Settings {

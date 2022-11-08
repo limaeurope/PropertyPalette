@@ -17,7 +17,11 @@
 #include	"DGFileDialog.hpp"
 
 #include	"Property.h"
-#include	"S_DisplayedProperty.h"
+#include	"DisplayedProperty.hpp"
+#include	"Enums/PropertySelectMode.hpp"
+#include	"Enums/PropertySelectMode.hpp"
+#include	"Data/SettingsSingleton.hpp"
+
 
 using namespace std;
 
@@ -35,30 +39,10 @@ static bool					isPopupInitialized = false;
 // ---------------------------------- Prototypes -------------------------------
 
 
-enum {
-	Button_0 = 1,
-	PopupControl_0,
-	TextEdit_0,
-	RealEdit_0,
-	AngleEdit_0,
-	LengthEdit_0,
-	AreaEdit_0,
-	VolumeEdit_0,
-	SingleSelList_0,
-};
-
-typedef enum {
-	PSM_Union,
-	PSM_Intersection,
-	PSM_LastAdded,
-} propertySelectMode;
-
-
 struct S_PropertyGroup : API_PropertyGroup {
 	GS::Array<API_Guid> propertieS;
 	S_PropertyGroup(API_PropertyGroup& i_group) : API_PropertyGroup(i_group) {};
 };
-
 
 void AddOrUpdateGroup(GS::HashTable<API_Guid, S_PropertyGroup>& i_groupS, API_Property& i_prop)
 {
@@ -76,7 +60,6 @@ void AddOrUpdateGroup(GS::HashTable<API_Guid, S_PropertyGroup>& i_groupS, API_Pr
 		i_groupS[i_prop.definition.groupGuid].propertieS.Push(i_prop.definition.guid);
 }
 
-
 // -----------------------------------------------------------------------------
 // SelectionChangeHandlerProc
 //
@@ -91,7 +74,7 @@ static GSErrCode __ACENV_CALL SelectionChangeHandlerProc(const API_Neig* selElem
 	GS::Array<API_Property> propertieS;
 
 	GS::HashTable<API_Guid, S_PropertyGroup> groupS;
-	GS::HashTable< API_Guid, S_DisplayedProperty> collectedPropertieS;
+	GS::HashTable< API_Guid, DisplayedProperty> collectedPropertieS;
 
 	bool isFirstElement = true;
 
@@ -100,7 +83,7 @@ static GSErrCode __ACENV_CALL SelectionChangeHandlerProc(const API_Neig* selElem
 	if (err == APIERR_NOSEL)
 		err = NoError;
 
-	propertySelectMode psm = PSM_Intersection;
+	short iDialogListPos = 1;
 
 	for (const API_Neig& selNeig : selNeigs)
 	{
@@ -112,7 +95,7 @@ static GSErrCode __ACENV_CALL SelectionChangeHandlerProc(const API_Neig* selElem
 		{
 			for (auto& prop : propertieS)
 			{
-				collectedPropertieS.Add(prop.definition.guid, S_DisplayedProperty(prop));
+				collectedPropertieS.Add(prop.definition.guid, DisplayedProperty(prop, selNeig.guid));
 
 				AddOrUpdateGroup(groupS, prop);
 			}
@@ -125,18 +108,19 @@ static GSErrCode __ACENV_CALL SelectionChangeHandlerProc(const API_Neig* selElem
 			{
 				if (collectedPropertieS.ContainsKey(prop.definition.guid))
 				{
-					collectedPropertieS[prop.definition.guid].addExample(prop);
+					collectedPropertieS[prop.definition.guid].addExample(prop, selNeig.guid);
 
 					AddOrUpdateGroup(groupS, prop);
 				}
 				else
-					switch (psm)
+					switch (SETTINGS().GetPropertySelectMode())
 					{
 					case PSM_Intersection:
+						//TODO remove some
 						break;
 					case PSM_Union:
 					case PSM_LastAdded:
-						collectedPropertieS.Add(prop.definition.guid, S_DisplayedProperty(prop));
+						collectedPropertieS.Add(prop.definition.guid, DisplayedProperty(prop, selNeig.guid));
 
 						AddOrUpdateGroup(groupS, prop);
 
@@ -144,6 +128,8 @@ static GSErrCode __ACENV_CALL SelectionChangeHandlerProc(const API_Neig* selElem
 					}
 			}
 		}
+		
+		isFirstElement = false;
 	}
 
 	DGListDeleteItem(32400, SingleSelList_0, DG_ALL_ITEMS);
@@ -154,20 +140,19 @@ static GSErrCode __ACENV_CALL SelectionChangeHandlerProc(const API_Neig* selElem
 
 		DGListSetTabItemText(32400, SingleSelList_0, DG_LIST_BOTTOM, 1, group.value->name);
 		DGListSetItemBackgroundColor(32400, SingleSelList_0, DG_LIST_BOTTOM, 0xd8d8, 0xd8d8, 0xd8d8);
+		iDialogListPos++;
 
 		for (auto& propGuid : group.value->propertieS)
 		{
-			auto& prop = collectedPropertieS[propGuid];
+			DisplayedProperty dProp = collectedPropertieS[propGuid];
 
 			DGListInsertItem(32400, SingleSelList_0, DG_LIST_BOTTOM);
 
-			DGListSetTabItemText(32400, SingleSelList_0, DG_LIST_BOTTOM, 1, prop.definition.name);
-			DGListSetTabItemText(32400, SingleSelList_0, DG_LIST_BOTTOM, 2, prop.toUniString());
+			DGListSetTabItemText(32400, SingleSelList_0, DG_LIST_BOTTOM, 1, dProp.definition.name);
+			DGListSetTabItemText(32400, SingleSelList_0, DG_LIST_BOTTOM, 2, dProp.toUniString());
+			SETTINGS().AddToPropertyList(iDialogListPos++, dProp);
 		}
 	}
-
-
-	isFirstElement = false;
 
 	return NoError;
 }
@@ -194,8 +179,6 @@ static short DGCALLBACK CntlDlgCallBack(short message, short dialID, short item,
 	switch (message){
 	case DG_MSG_INIT:
 	{
-
-
 		break;
 	}
 	case DG_MSG_CLICK:
@@ -205,7 +188,7 @@ static short DGCALLBACK CntlDlgCallBack(short message, short dialID, short item,
 		case -1:
 		case Button_0:
 		{
-			DGHideModelessDialog(32400);
+			DGHideModelessDialog(dialID);
 
 			Do_SelectionMonitor(false);
 
@@ -213,7 +196,38 @@ static short DGCALLBACK CntlDlgCallBack(short message, short dialID, short item,
 		}
 		case SingleSelList_0:
 		{
-			DGListSetDialItemOnTabField(32400, SingleSelList_0, 2, 2);
+			short _id = DGListGetSelected(dialID, SingleSelList_0, DG_LIST_TOP);
+			DisplayedProperty _prop = SETTINGS().GetFromPropertyList(_id);
+
+			switch (_prop.GetOnTabType())
+			{
+			case CheckBox_0:
+			{
+				break;
+			}
+			case RealEdit_0:
+			case IntEdit_0:
+			case TextEdit_0:
+			{
+				DGListSetDialItemOnTabField(dialID, SingleSelList_0, 2, _prop.GetOnTabType());
+
+				DGSetItemText(dialID, TextEdit_0, _prop);
+
+				break;
+			}
+			case PopupControl_0:
+			{
+				DGListSetDialItemOnTabField(dialID, SingleSelList_0, 2, PopupControl_0);
+
+				for (auto _var : _prop.value.listVariant.variants)
+				{
+					DGPopUpInsertItem(dialID, PopupControl_0, DG_LIST_BOTTOM);
+					DGPopUpSetItemText(dialID, PopupControl_0, DG_LIST_BOTTOM, _prop);
+				}
+
+				break;
+			}
+			}
 
 			break;
 		}
@@ -223,9 +237,34 @@ static short DGCALLBACK CntlDlgCallBack(short message, short dialID, short item,
 
 		break;
 	}
+	case DG_MSG_CHANGE:
+	{
+		switch (item)
+		{
+		case RealEdit_0:
+		{
+			SETTINGS().GetFromPropertyList() = DGGetItemText(dialID, RealEdit_0);
+
+			break;
+		}
+		case IntEdit_0:
+		{
+			SETTINGS().GetFromPropertyList() = DGGetItemText(dialID, IntEdit_0);
+
+			break;
+		}
+		case TextEdit_0:
+		{
+			SETTINGS().GetFromPropertyList() = DGGetItemText(dialID, TextEdit_0);
+
+			break;
+		}
+		}
+		break;
+	}
 	case DG_MSG_CLOSE:
 	{
-		DGHideModelessDialog(32400);
+		DGHideModelessDialog(dialID);
 
 		Do_SelectionMonitor(false);
 
@@ -256,6 +295,8 @@ void Do_ShowPropertyPalette()
 		DGHideItem(32400, LengthEdit_0);
 		DGHideItem(32400, AreaEdit_0);
 		DGHideItem(32400, VolumeEdit_0);
+		DGHideItem(32400, IntEdit_0);
+		DGHideItem(32400, CheckBox_0);
 
 		DGListSetItemHeight(32400, SingleSelList_0, 28);
 
