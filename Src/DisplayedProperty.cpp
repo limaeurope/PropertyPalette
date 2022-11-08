@@ -16,7 +16,7 @@ void DisplayedProperty::addExample(const API_Property& i_prop, const API_Guid& i
 			if (value.singleVariant.variant.intValue != i_prop.value.singleVariant.variant.intValue)
 			{
 				value.singleVariant.variant.intValue = 0;
-				m_areAllValuesEqual = false;
+				AreAllValuesEqual = false;
 			}
 		}
 		case API_PropertyRealValueType:
@@ -24,7 +24,7 @@ void DisplayedProperty::addExample(const API_Property& i_prop, const API_Guid& i
 			if (value.singleVariant.variant.doubleValue != i_prop.value.singleVariant.variant.doubleValue)
 			{
 				value.singleVariant.variant.doubleValue = 0.0;
-				m_areAllValuesEqual = false;
+				AreAllValuesEqual = false;
 			}
 		}
 		case API_PropertyBooleanValueType:
@@ -32,7 +32,7 @@ void DisplayedProperty::addExample(const API_Property& i_prop, const API_Guid& i
 			if (value.singleVariant.variant.boolValue != i_prop.value.singleVariant.variant.boolValue)
 			{
 				value.singleVariant.variant.boolValue = false;
-				m_areAllValuesEqual = false;
+				AreAllValuesEqual = false;
 			}
 		}
 		case API_PropertyStringValueType:
@@ -40,18 +40,18 @@ void DisplayedProperty::addExample(const API_Property& i_prop, const API_Guid& i
 			if (value.singleVariant.variant.uniStringValue != i_prop.value.singleVariant.variant.uniStringValue)
 			{
 				value.singleVariant.variant.uniStringValue = "";
-				m_areAllValuesEqual = false;
+				AreAllValuesEqual = false;
 			}
 		}
 		}	}
 	case API_PropertyListCollectionType:
 	case API_PropertyMultipleChoiceEnumerationCollectionType:
 	{
-		//if (value.listVariant.variants != i_prop.value.listVariant.variants)
-		//{
-		//	value.listVariant.variants = {};
-		//	m_isValuesEqual = false;
-		//}
+		if (value.listVariant.variants != i_prop.value.listVariant.variants)
+		{
+			value.listVariant.variants = {};
+			AreAllValuesEqual = false;
+		}
 	}
 	}
 
@@ -59,9 +59,9 @@ void DisplayedProperty::addExample(const API_Property& i_prop, const API_Guid& i
 	representedObjectS.Push(i_guidObj);
 }
 
-GS::UniString DisplayedProperty::_toUniString(API_Variant i_variant)
+GS::UniString DisplayedProperty::_toUniString(const API_Variant &i_variant)
 {
-	switch (definition.valueType)
+	switch (i_variant.type)
 	{
 	case API_PropertyIntegerValueType:
 	case API_PropertyRealValueType:
@@ -86,7 +86,7 @@ GS::UniString DisplayedProperty::_toUniString(API_Variant i_variant)
 GS::UniString DisplayedProperty::toUniString()
 {
 	{
-		if (!m_areAllValuesEqual)
+		if (!AreAllValuesEqual)
 			return "<Multiple values>";
 
 		switch (definition.collectionType)
@@ -104,10 +104,11 @@ GS::UniString DisplayedProperty::toUniString()
 			for (auto& _var : value.listVariant.variants)
 			{
 				if (sResult.GetLength())
-					sResult += "; ";
-				sResult += _toUniString(_var);
+					sResult.Append("; ");
+				sResult.Append(_toUniString(_var));
 			}
 
+			auto _a = sResult.ToCStr().Get();
 			return sResult;
 		}
 		}
@@ -196,3 +197,44 @@ DisplayedProperty::DisplayedProperty(const API_Property& i_prop, const API_Guid&
 	representedObjectS.Push(i_guidObj);
 }
 
+bool operator==(const API_Variant& i_this, const API_Variant& i_other)
+{
+	if (i_this.type != i_other.type)
+		return false;
+	else
+		switch (i_this.type)
+		{
+			case API_PropertyUndefinedValueType:
+			{
+				return false;
+				break;
+			}
+			case API_PropertyIntegerValueType:
+			{
+				return i_this.intValue == i_other.intValue;
+				break;
+			}
+			case API_PropertyRealValueType:
+			{
+				return i_this.doubleValue == i_other.doubleValue;
+				break;
+			}
+			case API_PropertyStringValueType:
+			{
+				return i_this.uniStringValue == i_other.uniStringValue;
+				break;
+			}
+			case API_PropertyBooleanValueType:
+			{
+				return i_this.boolValue == i_other.boolValue;
+				break;
+			}
+			case API_PropertyGuidValueType:
+			{
+				return i_this.guidValue == i_other.guidValue;
+				break;
+			}
+			default:
+				return true;
+		}
+}

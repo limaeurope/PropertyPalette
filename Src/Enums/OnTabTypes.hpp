@@ -13,6 +13,12 @@ typedef enum {
 	IntEdit_0,
 	CheckBox_0,
 	SingleSelList_0,
+	PushRadio_1,
+	PushRadio_2,
+	PushRadio_3,
+
+	TextEdit_1,
+	PopupControl_2,
 }OnTabTypes;
 
 #endif // !_ON_TAB_TYPES_HPP

@@ -8,6 +8,7 @@
 #include	<mutex>
 #include	"../Enums/PropertySelectMode.hpp"
 #include	"../DisplayedProperty.hpp"
+#include	"Logger/Logger.hpp"
 
 
 class SettingsSingleton
@@ -20,6 +21,9 @@ class SettingsSingleton
 	PropertySelectMode m_propertySelectMode;
 	GS::HashTable<short, DisplayedProperty> m_propIdx;
 	DisplayedProperty* m_iPropCurrentlyEdited;
+	GS::UniString	m_appName;
+	GS::UniString	m_companyName;
+	Logger m_logger;
 public:
 	static SettingsSingleton& GetInstance();
 	
@@ -29,6 +33,8 @@ public:
 	inline void AddToPropertyList(const short i_idx, const DisplayedProperty& i_prop) { m_propIdx.Put(i_idx, i_prop); };
 	DisplayedProperty GetFromPropertyList(const short i_idx);
 	inline DisplayedProperty GetFromPropertyList() { return *m_iPropCurrentlyEdited; };
+
+	inline Logger& GetLogger() { return m_logger; };
 };
 
 static std::mutex _mutex;

@@ -7,12 +7,12 @@
 #include	"Enums/OnTabTypes.hpp"
 
 class DisplayedProperty : public API_Property {
-	bool m_areAllValuesEqual = true;
-	GS::UniString _toUniString(API_Variant i_variant);
+	GS::UniString _toUniString(const API_Variant& i_variant);
 	OnTabTypes m_onTabType;
 	GS::Array<API_Guid> representedPropertieS;
 	GS::Array<API_Guid> representedObjectS;
 public:
+	bool AreAllValuesEqual = true;
 	DisplayedProperty(const API_Property& i_prop, const API_Guid& i_guidObj);
 	void addExample(const API_Property& i_prop, const API_Guid& i_guidObj);
 	GS::UniString toUniString();
@@ -23,6 +23,8 @@ public:
 	void operator= (const double i_value);
 	void operator= (const int i_value);
 };
+
+bool operator== (const API_Variant& i_this, const API_Variant& i_other);
 
 #endif // !DISPLAYED_PROPERTY_HPP
 

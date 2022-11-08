@@ -21,6 +21,8 @@
 #include	"Enums/PropertySelectMode.hpp"
 #include	"Enums/PropertySelectMode.hpp"
 #include	"Data/SettingsSingleton.hpp"
+#include	<exception>
+#include	"Logger/Logger.hpp"
 
 
 using namespace std;
@@ -183,59 +185,85 @@ static short DGCALLBACK CntlDlgCallBack(short message, short dialID, short item,
 	}
 	case DG_MSG_CLICK:
 	{
-		switch (item)
+		try
 		{
-		case -1:
-		case Button_0:
-		{
-			DGHideModelessDialog(dialID);
-
-			Do_SelectionMonitor(false);
-
-			break;
-		}
-		case SingleSelList_0:
-		{
-			short _id = DGListGetSelected(dialID, SingleSelList_0, DG_LIST_TOP);
-			DisplayedProperty _prop = SETTINGS().GetFromPropertyList(_id);
-
-			switch (_prop.GetOnTabType())
+			switch (item)
 			{
-			case CheckBox_0:
+			case -1:
+			case Button_0:
 			{
-				break;
-			}
-			case RealEdit_0:
-			case IntEdit_0:
-			case TextEdit_0:
-			{
-				DGListSetDialItemOnTabField(dialID, SingleSelList_0, 2, _prop.GetOnTabType());
+				DGHideModelessDialog(dialID);
 
-				DGSetItemText(dialID, TextEdit_0, _prop);
+				Do_SelectionMonitor(false);
 
 				break;
 			}
-			case PopupControl_0:
+			case SingleSelList_0:
 			{
-				DGListSetDialItemOnTabField(dialID, SingleSelList_0, 2, PopupControl_0);
+				short _id = DGListGetSelected(dialID, SingleSelList_0, DG_LIST_TOP);
+				DisplayedProperty _prop = SETTINGS().GetFromPropertyList(_id);
 
-				for (auto _var : _prop.value.listVariant.variants)
+				switch (_prop.GetOnTabType())
 				{
-					DGPopUpInsertItem(dialID, PopupControl_0, DG_LIST_BOTTOM);
-					DGPopUpSetItemText(dialID, PopupControl_0, DG_LIST_BOTTOM, _prop);
+				case CheckBox_0:
+				{
+					//TODO;
+					break;
+				}
+				case RealEdit_0:
+				case IntEdit_0:
+				case TextEdit_0:
+				{
+					DGListSetDialItemOnTabField(dialID, SingleSelList_0, 2, _prop.GetOnTabType());
+
+					DGSetItemText(dialID, TextEdit_0, _prop.AreAllValuesEqual ? _prop.toUniString() : "");
+
+					break;
+				}
+				case PopupControl_0:
+				{
+					DGListSetDialItemOnTabField(dialID, SingleSelList_0, 2, PopupControl_0);
+
+					for (auto _var : _prop.value.listVariant.variants)
+					{
+						DGPopUpInsertItem(dialID, PopupControl_0, DG_LIST_BOTTOM);
+						DGPopUpSetItemText(dialID, PopupControl_0, DG_LIST_BOTTOM, _prop);
+					}
+
+					break;
+				}
+				case PushRadio_1:
+				{
+					SETTINGS().SetPropertySelectMode(PSM_Intersection);
+
+					break;
+				}
+				case PushRadio_2:
+				{
+					SETTINGS().SetPropertySelectMode(PSM_Union);
+
+					break;
+				}
+				case PushRadio_3:
+				{
+					SETTINGS().SetPropertySelectMode(PSM_LastAdded);
+
+					break;
+				}
 				}
 
 				break;
 			}
+			default:
+				break;
 			}
 
 			break;
 		}
-		default:
-			break;
-		}
+		catch (exception)
+		{
 
-		break;
+		}
 	}
 	case DG_MSG_CHANGE:
 	{
@@ -260,6 +288,22 @@ static short DGCALLBACK CntlDlgCallBack(short message, short dialID, short item,
 			break;
 		}
 		}
+		break;
+	}
+	case DG_MSG_GROW:
+	{
+		short	hgrow = DGGetHGrow(msgData);
+		short	vgrow = DGGetVGrow(msgData);
+
+		//DGResizeMsgData* _msgData = static_cast<DGResizeMsgData*> ((void*)msgData);
+
+		DGBeginMoveGrowItems(dialID);
+		DGGrowItem(dialID, SingleSelList_0, hgrow, vgrow);
+		DGMoveItem(dialID, Button_0, hgrow, vgrow);
+		DGMoveItem(dialID, Button_1, 0, vgrow);
+		DGMoveItem(dialID, Button_2, 0, vgrow);
+		DGMoveItem(dialID, Button_3, 0, vgrow);
+		DGEndMoveGrowItems(dialID);
 		break;
 	}
 	case DG_MSG_CLOSE:
@@ -305,7 +349,6 @@ void Do_ShowPropertyPalette()
 	else
 		if (!DGIsModelessDialogVisible(32400))
 			DGShowModelessDialog(32400, DG_TOP_MODAL);
-
 }
 
 // -----------------------------------------------------------------------------
@@ -376,5 +419,7 @@ GSErrCode __ACENV_CALL	Initialize (void)
 
 GSErrCode __ACENV_CALL	FreeData (void)
 {
+	DGModelessClose(32400);
+
 	return NoError;
 }		/* FreeData */

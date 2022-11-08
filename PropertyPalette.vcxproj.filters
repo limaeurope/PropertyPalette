@@ -10,6 +10,18 @@
     <ClCompile Include="Src\DisplayedProperty.cpp">
       <Filter>Data</Filter>
     </ClCompile>
+    <ClCompile Include="..\CPPCommonLibs\Logger\Logger.cpp">
+      <Filter>CPPCommonLibs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CPPCommonLibs\Utils\Utils.cpp">
+      <Filter>CPPCommonLibs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CPPCommonLibs\WinReg\WinReg.cpp">
+      <Filter>CPPCommonLibs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CPPCommonLibs\DateTime\DateTime.cpp">
+      <Filter>CPPCommonLibs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\APICommon.h" />
@@ -26,6 +38,24 @@
     </ClInclude>
     <ClInclude Include="Src\Enums\OnTabTypes.hpp">
       <Filter>Enums</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CPPCommonLibs\Logger\Logger.hpp">
+      <Filter>CPPCommonLibs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CPPCommonLibs\Logger\Loglevels.hpp">
+      <Filter>CPPCommonLibs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CPPCommonLibs\Logger\LoglevelStrings.hpp">
+      <Filter>CPPCommonLibs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CPPCommonLibs\Utils\Utils.hpp">
+      <Filter>CPPCommonLibs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CPPCommonLibs\WinReg\WinReg.hpp">
+      <Filter>CPPCommonLibs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CPPCommonLibs\DateTime\DateTime.hpp">
+      <Filter>CPPCommonLibs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -77,6 +107,9 @@
     </Filter>
     <Filter Include="Data">
       <UniqueIdentifier>{3979ab9b-aae0-478c-b428-214a72659216}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CPPCommonLibs">
+      <UniqueIdentifier>{89e462b0-d65a-420a-9af2-e2f0c5c1da4c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

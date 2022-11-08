@@ -50,20 +50,11 @@
     <ACVersion>26</ACVersion>
     <BuildType>Release</BuildType>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(ACVersion)'==24" Label="UserMacros">
+  <PropertyGroup Label="UserMacros">
     <ACDevKit>..\ArchiCAD_API\API Development Kit $(ACVersion)</ACDevKit>
     <ACDevKitSupport>$(ACDevKit)\Support</ACDevKitSupport>
     <ACDevKitModules>$(ACDevKitSupport)\Modules</ACDevKitModules>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(ACVersion)'==25" Label="UserMacros">
-    <ACDevKit>..\ArchiCAD_API\API Development Kit $(ACVersion)</ACDevKit>
-    <ACDevKitSupport>$(ACDevKit)\Support</ACDevKitSupport>
-    <ACDevKitModules>$(ACDevKitSupport)\Modules</ACDevKitModules>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(ACVersion)'==26" Label="UserMacros">
-    <ACDevKit>..\ArchiCAD_API\API Development Kit $(ACVersion)</ACDevKit>
-    <ACDevKitSupport>$(ACDevKit)\Support</ACDevKitSupport>
-    <ACDevKitModules>$(ACDevKitSupport)\Modules</ACDevKitModules>
+    <CommonModules>..\CPPCommonLibs</CommonModules>
   </PropertyGroup>
   <PropertyGroup Condition="'$(ACVersion)'=='24'" Label="Globals">
     <ProjectGuid>{24c5efac-a5fc-4235-9dcf-976D7AA951C6}</ProjectGuid>
@@ -147,17 +138,17 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(ACVersion)'== 24">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ACDevKitModules)\LibXL;$(ACDevKitModules)\TextEngine;$(ACDevKitModules)\Graphix;$(ACDevKitModules)\InputOutput;$(ACDevKitSupport)\Inc;$(ACDevKitModules)\GSRoot;$(ACDevKitModules)\GSUtils;$(ACDevKitModules)\DGLib</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CommonModules);$(ACDevKitModules)\LibXL;$(ACDevKitModules)\TextEngine;$(ACDevKitModules)\Graphix;$(ACDevKitModules)\InputOutput;$(ACDevKitSupport)\Inc;$(ACDevKitModules)\GSRoot;$(ACDevKitModules)\GSUtils;$(ACDevKitModules)\DGLib</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(ACVersion)'== 25">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ACDevKitModules)\LibXL;$(ACDevKitModules)\RS;$(ACDevKitModules)\TextEngine;$(ACDevKitModules)\Graphix;$(ACDevKitModules)\InputOutput;$(ACDevKitSupport)\Extensions\APIOutputFramework;$(ACDevKitSupport)\Inc;$(ACDevKitModules)\GSRoot;$(ACDevKitModules)\GSUtils;$(ACDevKitModules)\DGLib</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CommonModules);$(ACDevKitModules)\LibXL;$(ACDevKitModules)\RS;$(ACDevKitModules)\TextEngine;$(ACDevKitModules)\Graphix;$(ACDevKitModules)\InputOutput;$(ACDevKitSupport)\Extensions\APIOutputFramework;$(ACDevKitSupport)\Inc;$(ACDevKitModules)\GSRoot;$(ACDevKitModules)\GSUtils;$(ACDevKitModules)\DGLib</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(ACVersion)'== 26">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ACDevKitModules)\LibXL;$(ACDevKitModules)\RS;$(ACDevKitModules)\TextEngine;$(ACDevKitModules)\Graphix;$(ACDevKitModules)\InputOutput;$(ACDevKitSupport)\Extensions\APIOutputFramework;$(ACDevKitSupport)\Inc;$(ACDevKitModules)\GSRoot;$(ACDevKitModules)\GSUtils;$(ACDevKitModules)\DGLib</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CommonModules);$(ACDevKitModules)\LibXL;$(ACDevKitModules)\RS;$(ACDevKitModules)\TextEngine;$(ACDevKitModules)\Graphix;$(ACDevKitModules)\InputOutput;$(ACDevKitSupport)\Extensions\APIOutputFramework;$(ACDevKitSupport)\Inc;$(ACDevKitModules)\GSRoot;$(ACDevKitModules)\GSUtils;$(ACDevKitModules)\DGLib</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug 24'">
@@ -233,6 +224,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\CPPCommonLibs\DateTime\DateTime.cpp" />
+    <ClCompile Include="..\CPPCommonLibs\Logger\Logger.cpp" />
+    <ClCompile Include="..\CPPCommonLibs\Utils\Utils.cpp" />
+    <ClCompile Include="..\CPPCommonLibs\WinReg\WinReg.cpp" />
     <ClCompile Include="Src\Data\SettingsSingleton.cpp" />
     <ClCompile Include="Src\$(ProjectName).cpp" />
     <ClCompile Include="Src\APICommon.c" />
@@ -303,6 +298,12 @@
     </Library>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\CPPCommonLibs\DateTime\DateTime.hpp" />
+    <ClInclude Include="..\CPPCommonLibs\Logger\Logger.hpp" />
+    <ClInclude Include="..\CPPCommonLibs\Logger\Loglevels.hpp" />
+    <ClInclude Include="..\CPPCommonLibs\Logger\LoglevelStrings.hpp" />
+    <ClInclude Include="..\CPPCommonLibs\Utils\Utils.hpp" />
+    <ClInclude Include="..\CPPCommonLibs\WinReg\WinReg.hpp" />
     <ClInclude Include="Src\Data\SettingsSingleton.hpp" />
     <ClInclude Include="Src\APICommon.h" />
     <ClInclude Include="Src\Enums\OnTabTypes.hpp" />
