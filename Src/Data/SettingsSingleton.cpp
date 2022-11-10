@@ -36,3 +36,23 @@ DisplayedProperty SettingsSingleton::GetFromPropertyList(const short i_idx)
 	return m_propIdx[i_idx];
 }
 
+void SettingsSingleton::SetFilterType(GS::UniString& i_sTypeFilter)
+{
+	if (i_sTypeFilter == "")
+		m_typeFilter = FT_None;
+	else if (i_sTypeFilter == "Integer")
+		m_typeFilter = FT_Int;
+	else if (i_sTypeFilter == "Real")
+		m_typeFilter = FT_Real;
+	else if (i_sTypeFilter == "Boolean")
+		m_typeFilter = FT_Bool;
+	else if (i_sTypeFilter == "String")
+		m_typeFilter = FT_String;
+	else if (i_sTypeFilter == "List")
+		m_typeFilter = FT_List;
+	else if (i_sTypeFilter == "Single Selection Enum")
+		m_typeFilter = FT_SingleEnum;
+	else if (i_sTypeFilter == "Multi Selection Enum")
+		m_typeFilter = FT_MultiEnum;
+}
+

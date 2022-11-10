@@ -7,6 +7,7 @@
 
 #include	<mutex>
 #include	"../Enums/PropertySelectMode.hpp"
+#include	"../Enums/FilterTypes.hpp"
 #include	"../DisplayedProperty.hpp"
 #include	"Logger/Logger.hpp"
 
@@ -18,12 +19,14 @@ class SettingsSingleton
 	SettingsSingleton(const SettingsSingleton&);
 	void operator=(const SettingsSingleton&) {};
 	
-	PropertySelectMode m_propertySelectMode;
-	GS::HashTable<short, DisplayedProperty> m_propIdx;
-	DisplayedProperty* m_iPropCurrentlyEdited;
-	GS::UniString	m_appName;
-	GS::UniString	m_companyName;
-	Logger m_logger;
+	PropertySelectMode							m_propertySelectMode;
+	GS::HashTable<short, DisplayedProperty>		m_propIdx;
+	DisplayedProperty*							m_iPropCurrentlyEdited;
+	GS::UniString								m_appName;
+	GS::UniString								m_companyName;
+	Logger										m_logger;
+	GS::UniString								m_sFilter;
+	TypeFilter									m_typeFilter;
 public:
 	static SettingsSingleton& GetInstance();
 	
@@ -35,6 +38,13 @@ public:
 	inline DisplayedProperty GetFromPropertyList() { return *m_iPropCurrentlyEdited; };
 
 	inline Logger& GetLogger() { return m_logger; };
+
+	inline void SetFilterText(GS::UniString const& i_sFilter) { m_sFilter = i_sFilter.ToLowerCase(); };
+	inline GS::UniString GetFilterText() const { return m_sFilter ; } ;
+
+	void SetFilterType(GS::UniString &  i_sTypeFilter);
+	inline void SetFilterType(TypeFilter & i_typeFilter) { m_typeFilter = i_typeFilter; }
+	inline TypeFilter GetFilterType() const { return m_typeFilter; };
 };
 
 static std::mutex _mutex;

@@ -18,7 +18,7 @@ typedef enum {
 	PushRadio_3,
 
 	TextEdit_1,
-	PopupControl_2,
+	PopupControl_1,
 }OnTabTypes;
 
 #endif // !_ON_TAB_TYPES_HPP

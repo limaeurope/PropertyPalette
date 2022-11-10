@@ -8,8 +8,7 @@
 // [SG compatible] - Yes
 // *****************************************************************************
 
-#if !defined _COPY_CLASSIFICATIONS_H
-#define _COPY_CLASSIFICATIONS_H
+#ifndef _PROPERTY_PALETTE_H
+#define _PROPERTY_PALETTE_H
 
-void	CopyClassifications(const bool i_writeReport = false, const bool i_onlyErrors = false);
-#endif
+#endif	// _PROPERTY_PALETTE_H

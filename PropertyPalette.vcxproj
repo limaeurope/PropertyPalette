@@ -231,6 +231,7 @@
     <ClCompile Include="Src\Data\SettingsSingleton.cpp" />
     <ClCompile Include="Src\$(ProjectName).cpp" />
     <ClCompile Include="Src\APICommon.c" />
+    <ClCompile Include="Src\Data\S_PropertyGroup.cpp" />
     <ClCompile Include="Src\Property.cpp" />
     <ClCompile Include="Src\DisplayedProperty.cpp" />
   </ItemGroup>
@@ -306,6 +307,8 @@
     <ClInclude Include="..\CPPCommonLibs\WinReg\WinReg.hpp" />
     <ClInclude Include="Src\Data\SettingsSingleton.hpp" />
     <ClInclude Include="Src\APICommon.h" />
+    <ClInclude Include="Src\Data\S_PropertyGroup.hpp" />
+    <ClInclude Include="Src\Enums\FilterTypes.hpp" />
     <ClInclude Include="Src\Enums\OnTabTypes.hpp" />
     <ClInclude Include="Src\Enums\PropertySelectMode.hpp" />
     <ClInclude Include="Src\Property.h" />

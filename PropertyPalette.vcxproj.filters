@@ -22,6 +22,9 @@
     <ClCompile Include="..\CPPCommonLibs\DateTime\DateTime.cpp">
       <Filter>CPPCommonLibs</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Data\S_PropertyGroup.cpp">
+      <Filter>Data</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\APICommon.h" />
@@ -56,6 +59,12 @@
     </ClInclude>
     <ClInclude Include="..\CPPCommonLibs\DateTime\DateTime.hpp">
       <Filter>CPPCommonLibs</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Data\S_PropertyGroup.hpp">
+      <Filter>Data</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Enums\FilterTypes.hpp">
+      <Filter>Enums</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
