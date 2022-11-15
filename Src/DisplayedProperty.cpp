@@ -66,8 +66,8 @@ GS::UniString DisplayedProperty::_toUniString(const API_Variant &i_variant)
 	case API_PropertyIntegerValueType:
 	case API_PropertyRealValueType:
 	{
-		char _s[32];
-		itoa(i_variant.intValue, _s, 1);
+		char _s[256];
+		itoa(i_variant.intValue, _s, 10);
 		return GS::UniString(_s);
 	}
 	case API_PropertyBooleanValueType:
@@ -98,6 +98,7 @@ GS::UniString DisplayedProperty::toUniString()
 		}
 		case API_PropertyListCollectionType:
 		case API_PropertyMultipleChoiceEnumerationCollectionType:
+		default:
 		{
 			GS::UniString sResult;
 
@@ -108,13 +109,11 @@ GS::UniString DisplayedProperty::toUniString()
 				sResult.Append(_toUniString(_var));
 			}
 
-			auto _a = sResult.ToCStr().Get();
 			return sResult;
 		}
 		}
 	}
 
-	return GS::UniString("");
 }
 
 void DisplayedProperty::operator=(const GS::UniString i_value)

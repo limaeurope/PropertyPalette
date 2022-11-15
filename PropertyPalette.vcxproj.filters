@@ -120,5 +120,37 @@
     <Filter Include="CPPCommonLibs">
       <UniqueIdentifier>{89e462b0-d65a-420a-9af2-e2f0c5c1da4c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Visualizers">
+      <UniqueIdentifier>{c17c8a4a-2b83-4fdb-88ee-47e3fec7822f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\..\Downloads\GSVisualStudioDebugVisualizers\BIMData.natvis">
+      <Filter>Visualizers</Filter>
+    </Natvis>
+    <Natvis Include="..\..\Downloads\GSVisualStudioDebugVisualizers\Brep.natvis">
+      <Filter>Visualizers</Filter>
+    </Natvis>
+    <Natvis Include="..\..\Downloads\GSVisualStudioDebugVisualizers\DynamicObject.natvis">
+      <Filter>Visualizers</Filter>
+    </Natvis>
+    <Natvis Include="..\..\Downloads\GSVisualStudioDebugVisualizers\Geometry.natvis">
+      <Filter>Visualizers</Filter>
+    </Natvis>
+    <Natvis Include="..\..\Downloads\GSVisualStudioDebugVisualizers\GS.natvis">
+      <Filter>Visualizers</Filter>
+    </Natvis>
+    <Natvis Include="..\..\Downloads\GSVisualStudioDebugVisualizers\GSModeler.natvis">
+      <Filter>Visualizers</Filter>
+    </Natvis>
+    <Natvis Include="..\..\Downloads\GSVisualStudioDebugVisualizers\GSXML.natvis">
+      <Filter>Visualizers</Filter>
+    </Natvis>
+    <Natvis Include="..\..\Downloads\GSVisualStudioDebugVisualizers\IO.natvis">
+      <Filter>Visualizers</Filter>
+    </Natvis>
+    <Natvis Include="..\..\Downloads\GSVisualStudioDebugVisualizers\ODB.natvis">
+      <Filter>Visualizers</Filter>
+    </Natvis>
   </ItemGroup>
 </Project>

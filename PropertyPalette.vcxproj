@@ -315,6 +315,17 @@
     <ClInclude Include="Src\PropertyPalette.h" />
     <ClInclude Include="Src\DisplayedProperty.hpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\..\Downloads\GSVisualStudioDebugVisualizers\BIMData.natvis" />
+    <Natvis Include="..\..\Downloads\GSVisualStudioDebugVisualizers\Brep.natvis" />
+    <Natvis Include="..\..\Downloads\GSVisualStudioDebugVisualizers\DynamicObject.natvis" />
+    <Natvis Include="..\..\Downloads\GSVisualStudioDebugVisualizers\Geometry.natvis" />
+    <Natvis Include="..\..\Downloads\GSVisualStudioDebugVisualizers\GS.natvis" />
+    <Natvis Include="..\..\Downloads\GSVisualStudioDebugVisualizers\GSModeler.natvis" />
+    <Natvis Include="..\..\Downloads\GSVisualStudioDebugVisualizers\GSXML.natvis" />
+    <Natvis Include="..\..\Downloads\GSVisualStudioDebugVisualizers\IO.natvis" />
+    <Natvis Include="..\..\Downloads\GSVisualStudioDebugVisualizers\ODB.natvis" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
