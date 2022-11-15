@@ -162,18 +162,20 @@ static GSErrCode __ACENV_CALL RefreshList(const API_Neig* selElemNeig)
 
 			DGListSetTabItemText(32400, SingleSelList_0, DG_LIST_BOTTOM, 1, group.value->name);
 			DGListSetItemBackgroundColor(32400, SingleSelList_0, DG_LIST_BOTTOM, 0xd8d8, 0xd8d8, 0xd8d8);
+			//SETTINGS().AddToGroupList(iDialogListPos++, *group.value);
 			iDialogListPos++;
 
-			for (auto& propGuid : _groupPropS)
-			{
-				DisplayedProperty dProp = collectedPropertieS[propGuid];
+			if (group.value->GetVisibility())
+				for (auto& propGuid : _groupPropS)
+				{
+					DisplayedProperty dProp = collectedPropertieS[propGuid];
 
-				DGListInsertItem(32400, SingleSelList_0, DG_LIST_BOTTOM);
+					DGListInsertItem(32400, SingleSelList_0, DG_LIST_BOTTOM);
 
-				DGListSetTabItemText(32400, SingleSelList_0, DG_LIST_BOTTOM, 1, dProp.definition.name);
-				DGListSetTabItemText(32400, SingleSelList_0, DG_LIST_BOTTOM, 2, dProp.toUniString());
-				SETTINGS().AddToPropertyList(iDialogListPos++, dProp);
-			}
+					DGListSetTabItemText(32400, SingleSelList_0, DG_LIST_BOTTOM, 1, dProp.definition.name);
+					DGListSetTabItemText(32400, SingleSelList_0, DG_LIST_BOTTOM, 2, dProp.toUniString());
+					SETTINGS().AddToPropertyList(iDialogListPos++, dProp);
+				}
 		}
 	}
 
@@ -222,40 +224,50 @@ static short DGCALLBACK CntlDlgCallBack(short message, short dialID, short item,
 			case SingleSelList_0:
 			{
 				short _id = DGListGetSelected(dialID, SingleSelList_0, DG_LIST_TOP);
-				DisplayedProperty _prop = SETTINGS().GetFromPropertyList(_id);
+				try {
+					DisplayedProperty _prop = SETTINGS().GetFromPropertyList(_id);
 
-				switch (_prop.GetOnTabType())
-				{
-				case CheckBox_0:
-				{
-					//TODO;
-					break;
-				}
-				case RealEdit_0:
-				case IntEdit_0:
-				case TextEdit_0:
-				{
-					DGListSetDialItemOnTabField(dialID, SingleSelList_0, 2, _prop.GetOnTabType());
-
-					DGSetItemText(dialID, TextEdit_0, _prop.AreAllValuesEqual ? _prop.toUniString() : "");
-
-					break;
-				}
-				case PopupControl_0:
-				{
-					DGListSetDialItemOnTabField(dialID, SingleSelList_0, 2, PopupControl_0);
-
-					for (auto _var : _prop.value.listVariant.variants)
+					switch (_prop.GetOnTabType())
 					{
-						DGPopUpInsertItem(dialID, PopupControl_0, DG_LIST_BOTTOM);
-						DGPopUpSetItemText(dialID, PopupControl_0, DG_LIST_BOTTOM, _prop);
+					case CheckBox_0:
+					{
+						DGListSetTabItemIcon(dialID, SingleSelList_0, _id, 2, DG_LIST_CHECKEDICON);
+						break;
+					}
+					case RealEdit_0:
+					case IntEdit_0:
+					case TextEdit_0:
+					{
+						DGListSetDialItemOnTabField(dialID, SingleSelList_0, 2, _prop.GetOnTabType());
+
+						DGSetItemText(dialID, TextEdit_0, _prop.AreAllValuesEqual ? _prop.toUniString() : "");
+
+						break;
+					}
+					case PopupControl_0:
+					{
+						DGListSetDialItemOnTabField(dialID, SingleSelList_0, 2, PopupControl_0);
+						DGPopUpDeleteItem(dialID, PopupControl_0, DG_ALL_ITEMS);
+
+						for (auto &_var : _prop.GetVariants())
+						{
+							DGPopUpInsertItem(dialID, PopupControl_0, DG_LIST_BOTTOM);
+							DGPopUpSetItemText(dialID, PopupControl_0, DG_LIST_BOTTOM, _var.sName);
+						}
+
+						break;
+					}
 					}
 
 					break;
 				}
-				}
+				catch (exception) {
+					//S_PropertyGroup _group = SETTINGS().GetFromGroupList(_id);
 
-				break;
+					//_group.SetVisibility(!_group.GetVisibility());
+
+					//RefreshList(NULL);
+				}
 			}
 
 			default:

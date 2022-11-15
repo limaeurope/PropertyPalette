@@ -43,7 +43,8 @@ void DisplayedProperty::addExample(const API_Property& i_prop, const API_Guid& i
 				AreAllValuesEqual = false;
 			}
 		}
-		}	}
+		}	
+	}
 	case API_PropertyListCollectionType:
 	case API_PropertyMultipleChoiceEnumerationCollectionType:
 	{
@@ -59,61 +60,11 @@ void DisplayedProperty::addExample(const API_Property& i_prop, const API_Guid& i
 	representedObjectS.Push(i_guidObj);
 }
 
-GS::UniString DisplayedProperty::_toUniString(const API_Variant &i_variant)
-{
-	switch (i_variant.type)
-	{
-	case API_PropertyIntegerValueType:
-	case API_PropertyRealValueType:
-	{
-		char _s[256];
-		itoa(i_variant.intValue, _s, 10);
-		return GS::UniString(_s);
-	}
-	case API_PropertyBooleanValueType:
-	{
-		return GS::UniString(i_variant.boolValue ? "True" : "False");
-	}
-	case API_PropertyStringValueType:
-	{
-		return i_variant.uniStringValue;
-	}
-	}
-
-	return GS::UniString("");
-}
-
 GS::UniString DisplayedProperty::toUniString()
 {
-	{
-		if (!AreAllValuesEqual)
-			return "<Multiple values>";
-
-		switch (definition.collectionType)
-		{
-		case API_PropertySingleCollectionType:
-		case API_PropertySingleChoiceEnumerationCollectionType:
-		{
-			return _toUniString(value.singleVariant.variant);
-		}
-		case API_PropertyListCollectionType:
-		case API_PropertyMultipleChoiceEnumerationCollectionType:
-		default:
-		{
-			GS::UniString sResult;
-
-			for (auto& _var : value.listVariant.variants)
-			{
-				if (sResult.GetLength())
-					sResult.Append("; ");
-				sResult.Append(_toUniString(_var));
-			}
-
-			return sResult;
-		}
-		}
-	}
-
+	GS::UniString result;
+	ACAPI_Property_GetPropertyValueString(*this, &result);
+	return result;
 }
 
 void DisplayedProperty::operator=(const GS::UniString i_value)
@@ -146,13 +97,25 @@ void DisplayedProperty::operator=(const int i_value)
 		err = ACAPI_Element_SetProperty(objGuid, *this);
 }
 
+GS::Array<S_Variant> DisplayedProperty::GetVariants() const
+{
+	GS::Array<S_Variant> result;
+
+	for (auto _var : definition.possibleEnumValues)
+	{
+		//TODO
+		result.Push(S_Variant{ _var.displayVariant.uniStringValue, false });
+	}
+
+	return result;
+}
+
 DisplayedProperty::DisplayedProperty(const API_Property& i_prop, const API_Guid& i_guidObj)
 	: API_Property	(i_prop) 
 {
 	switch (definition.collectionType)
 	{
 	case API_PropertySingleCollectionType:
-	case API_PropertySingleChoiceEnumerationCollectionType:
 	{
 		switch (definition.valueType)
 		{
@@ -183,6 +146,7 @@ DisplayedProperty::DisplayedProperty(const API_Property& i_prop, const API_Guid&
 		break;
 	}
 	case API_PropertyListCollectionType:
+	case API_PropertySingleChoiceEnumerationCollectionType:
 	case API_PropertyMultipleChoiceEnumerationCollectionType:
 	{
 		m_onTabType = PopupControl_0;

@@ -36,6 +36,14 @@ DisplayedProperty SettingsSingleton::GetFromPropertyList(const short i_idx)
 	return m_propIdx[i_idx];
 }
 
+//S_PropertyGroup& SettingsSingleton::GetFromGroupList(const short i_idx)
+//{
+//	if (!m_groupIdx.ContainsKey(i_idx))
+//		throw std::exception();
+//
+//	return m_groupIdx[i_idx];
+//}
+
 void SettingsSingleton::SetFilterType(GS::UniString& i_sTypeFilter)
 {
 	if (i_sTypeFilter == "")

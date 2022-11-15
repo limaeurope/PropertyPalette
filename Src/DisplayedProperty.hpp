@@ -6,6 +6,11 @@
 #include	"APICommon.h"
 #include	"Enums/OnTabTypes.hpp"
 
+struct S_Variant {
+	GS::UniString	sName;
+	bool			isSelected;
+};
+
 class DisplayedProperty : public API_Property {
 	GS::UniString _toUniString(const API_Variant& i_variant);
 	OnTabTypes m_onTabType;
@@ -22,6 +27,7 @@ public:
 	void operator= (const GS::UniString i_value);
 	void operator= (const double i_value);
 	void operator= (const int i_value);
+	GS::Array<S_Variant>GetVariants() const;
 };
 
 bool operator== (const API_Variant& i_this, const API_Variant& i_other);

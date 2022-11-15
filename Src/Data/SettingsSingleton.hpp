@@ -9,6 +9,7 @@
 #include	"../Enums/PropertySelectMode.hpp"
 #include	"../Enums/FilterTypes.hpp"
 #include	"../DisplayedProperty.hpp"
+#include	"../Data/S_PropertyGroup.hpp"
 #include	"Logger/Logger.hpp"
 
 
@@ -21,6 +22,7 @@ class SettingsSingleton
 	
 	PropertySelectMode							m_propertySelectMode;
 	GS::HashTable<short, DisplayedProperty>		m_propIdx;
+	//GS::HashTable<short, S_PropertyGroup>		m_groupIdx;
 	DisplayedProperty*							m_iPropCurrentlyEdited;
 	GS::UniString								m_appName;
 	GS::UniString								m_companyName;
@@ -36,6 +38,9 @@ public:
 	inline void AddToPropertyList(const short i_idx, const DisplayedProperty& i_prop) { m_propIdx.Put(i_idx, i_prop); };
 	DisplayedProperty GetFromPropertyList(const short i_idx);
 	inline DisplayedProperty GetFromPropertyList() { return *m_iPropCurrentlyEdited; };
+
+	//inline void AddToGroupList(const short i_idx, const S_PropertyGroup& i_group) { m_groupIdx.Put(i_idx, i_group); };
+	//S_PropertyGroup& GetFromGroupList(const short i_idx);
 
 	inline Logger& GetLogger() { return m_logger; };
 
