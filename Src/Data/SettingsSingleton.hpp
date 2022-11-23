@@ -36,8 +36,8 @@ public:
 	inline PropertySelectMode GetPropertySelectMode() const { return m_propertySelectMode; };
 
 	inline void AddToPropertyList(const short i_idx, const DisplayedProperty& i_prop) { m_propIdx.Put(i_idx, i_prop); };
-	DisplayedProperty GetFromPropertyList(const short i_idx);
-	inline DisplayedProperty GetFromPropertyList() { return *m_iPropCurrentlyEdited; };
+	DisplayedProperty* GetCurrentlyEditedProperty(const short i_idx);
+	inline DisplayedProperty* GetCurrentlyEditedProperty() { return m_iPropCurrentlyEdited; };
 
 	//inline void AddToGroupList(const short i_idx, const S_PropertyGroup& i_group) { m_groupIdx.Put(i_idx, i_group); };
 	//S_PropertyGroup& GetFromGroupList(const short i_idx);

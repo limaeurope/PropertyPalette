@@ -22,6 +22,7 @@
 
 'GDLG'	32400	Palette | close	| grow		 40   40   490 248  "Properties" {
 /* [  1] */ Button				380  214   100  24  LargePlain "Close"
+
 /* [  2] */ PopupControl          0    0   100  24  24 5
 /* [  3] */ TextEdit	          0    0   100  24  LargePlain 256
 /* [  4] */ RealEdit	          0    0   100  24  LargePlain "0" "999"
@@ -31,14 +32,15 @@
 /* [  8] */ VolumeEdit            0    0   100  24  LargePlain "0" "999"
 /* [  9] */ IntEdit				  0    0   100  24  LargePlain "0" "999"
 /* [ 10] */ CheckBox         	  0    0   100  24  LargePlain ""
+
 /* [ 11] */ SingleSelList		 10   44   470 166  LargePlain PartialItems  HVScroll  24
 
-/* [ 12] */ PushRadio          	 10  214   100  24  LargePlain 1 "Intersection"
-/* [ 13] */ PushRadio          	120  214   100  24  LargePlain 1 "Union"
-/* [ 14] */ PushRadio          	230  214   100  24  LargePlain 1 "Last"
-
-/* [ 15] */ TextEdit	         10   10   350  24  LargePlain 256
-/* [ 16] */ PopupControl		370   10   100  24  24 5
+/* [ 12] */ PushRadio          	 10  214    90  24  LargePlain 1 "Intersection"
+/* [ 13] */ PushRadio          	110  214    90  24  LargePlain 1 "Union"
+/* [ 14] */ PushRadio          	210  214    90  24  LargePlain 1 "Last"
+/* [ 15] */ Button          	310  214    60  24  LargePlain "Help"
+/* [ 16] */ TextEdit	         10   10   350  24  LargePlain 256
+/* [ 17] */ PopupControl		370   10   100  24  24 5
 }
 
 'DLGH'  32400  DLG_32500_Fill_Settings {
@@ -57,8 +59,9 @@
 12	""							Button_1
 13	""							Button_2
 14	""							Button_3
+15	""							Button_4
 
-15	""							TextEdit_1
-16	""							PopupControl_2
+16	""							TextEdit_1
+17	""							PopupControl_2
 }
 

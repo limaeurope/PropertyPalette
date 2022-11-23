@@ -11,6 +11,10 @@ typedef enum {
 	FT_None,
 	FT_Int,
 	FT_Real,
+	FT_Angle,
+	FT_Length,
+	FT_Area,
+	FT_Volume,
 	FT_Bool,
 	FT_String,
 	FT_List,
@@ -22,6 +26,10 @@ const GS::Array<GS::UniString> TypeFilterNameS{
 	"",
 	"Integer",
 	"Real",
+	"Angle",
+	"Length",
+	"Area",
+	"Volume",
 	"Boolean",
 	"String",
 	"List",
@@ -50,7 +58,37 @@ inline bool operator == (TypeFilter i_this, DisplayedProperty i_that)
 		}
 		case API_PropertyRealValueType:
 		{
-			return i_this == FT_Real;
+			switch (i_that.definition.measureType)
+			{
+			case API_PropertyLengthMeasureType:
+			{
+				return i_this == FT_Length;
+
+				break;
+			}
+			case API_PropertyAreaMeasureType:
+			{
+				return i_this == FT_Length;
+
+				break;
+			}
+			case API_PropertyVolumeMeasureType:
+			{
+				return i_this == FT_Length;
+
+				break;
+			}
+			case API_PropertyAngleMeasureType:
+			{
+				return i_this == FT_Length;
+
+				break;
+			}
+			default:
+				return i_this == FT_Real;
+
+				break;
+			}
 		}
 		case API_PropertyBooleanValueType:
 		{

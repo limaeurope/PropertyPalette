@@ -44,6 +44,8 @@ void DisplayedProperty::addExample(const API_Property& i_prop, const API_Guid& i
 			}
 		}
 		}	
+
+		break;
 	}
 	case API_PropertyListCollectionType:
 	case API_PropertyMultipleChoiceEnumerationCollectionType:
@@ -53,6 +55,8 @@ void DisplayedProperty::addExample(const API_Property& i_prop, const API_Guid& i
 			value.listVariant.variants = {};
 			AreAllValuesEqual = false;
 		}
+
+		break;
 	}
 	}
 
@@ -69,42 +73,98 @@ GS::UniString DisplayedProperty::toUniString()
 
 void DisplayedProperty::operator=(const GS::UniString i_value)
 {
-	GSErrCode err;
+	isDefault = false;
+	value.variantStatus = API_VariantStatusNormal;
 
 	this->value.singleVariant.variant.uniStringValue = i_value;
 
 	for (auto objGuid : representedObjectS)
-		err = ACAPI_Element_SetProperty(objGuid, *this);
+		GSErrCode err = ACAPI_Element_SetProperty(objGuid, *this);
+}
+
+void DisplayedProperty::operator=(const bool i_value)
+{
+	isDefault = false;
+	value.variantStatus = API_VariantStatusNormal;
+
+	this->value.singleVariant.variant.boolValue = i_value;
+
+	for (auto objGuid : representedObjectS)
+		GSErrCode err = ACAPI_Element_SetProperty(objGuid, *this);
 }
 
 void DisplayedProperty::operator=(const double i_value)
 {
-	GSErrCode err;
+	isDefault = false;
+	value.variantStatus = API_VariantStatusNormal;
 
 	this->value.singleVariant.variant.doubleValue = i_value;
 
 	for (auto objGuid : representedObjectS)
-		err = ACAPI_Element_SetProperty(objGuid, *this);
+		GSErrCode err = ACAPI_Element_SetProperty(objGuid, *this);
 }
 
 void DisplayedProperty::operator=(const int i_value)
 {
-	GSErrCode err;
+	isDefault = false;
+	value.variantStatus = API_VariantStatusNormal;
 
 	this->value.singleVariant.variant.intValue = i_value;
 
 	for (auto objGuid : representedObjectS)
-		err = ACAPI_Element_SetProperty(objGuid, *this);
+		GSErrCode err = ACAPI_Element_SetProperty(objGuid, *this);
+}
+
+void DisplayedProperty::operator=(const S_Variant i_var)
+{
+	isDefault = false;
+	value.variantStatus = API_VariantStatusNormal;
+
+	switch (definition.collectionType)
+	{
+	//case API_PropertySingleCollectionType:
+	case API_PropertySingleChoiceEnumerationCollectionType:
+	{
+		value.singleVariant.variant.guidValue = i_var.guid;
+
+		break;
+	}
+	//case API_PropertyListCollectionType:
+	case API_PropertyMultipleChoiceEnumerationCollectionType:
+	default:
+	{
+		auto _v = API_Variant();
+		_v.guidValue = i_var.guid;
+		_v.type = API_PropertyGuidValueType;
+		value.listVariant.variants.Push(_v);
+
+		break;
+	}
+	}
+
+	for (auto objGuid : representedObjectS)
+		GSErrCode err = ACAPI_Element_SetProperty(objGuid, *this);
 }
 
 GS::Array<S_Variant> DisplayedProperty::GetVariants() const
 {
 	GS::Array<S_Variant> result;
+	bool _b;
 
 	for (auto _var : definition.possibleEnumValues)
 	{
-		//TODO
-		result.Push(S_Variant{ _var.displayVariant.uniStringValue, false });
+		_b = false;
+
+		for (auto& _v: value.listVariant.variants)
+		{
+			if (_v.guidValue == _var.keyVariant.guidValue)
+				_b = true;
+		}
+
+		if (value.singleVariant.variant.guidValue == _var.keyVariant.guidValue)
+			_b = true;
+
+		result.Push(S_Variant{ _var.displayVariant.uniStringValue, _b, _var.keyVariant.guidValue });
 	}
 
 	return result;
@@ -126,7 +186,37 @@ DisplayedProperty::DisplayedProperty(const API_Property& i_prop, const API_Guid&
 		}
 		case API_PropertyRealValueType:
 		{
-			m_onTabType = RealEdit_0;
+			switch (definition.measureType)
+			{
+			case API_PropertyLengthMeasureType:
+			{
+				m_onTabType = LengthEdit_0;
+
+				break;
+			}
+			case API_PropertyAreaMeasureType:
+			{
+				m_onTabType = AreaEdit_0;
+
+				break;
+			}
+			case API_PropertyVolumeMeasureType:
+			{
+				m_onTabType = VolumeEdit_0;
+
+				break;
+			}
+			case API_PropertyAngleMeasureType:
+			{
+				m_onTabType = AngleEdit_0;
+
+				break;
+			}
+			default:
+				m_onTabType = RealEdit_0;
+
+				break;
+			}
 			break;
 		}
 		case API_PropertyBooleanValueType:

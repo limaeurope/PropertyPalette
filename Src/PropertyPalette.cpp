@@ -25,6 +25,7 @@
 #include	"Data/S_PropertyGroup.hpp"
 //#include	<exception>
 //#include	"Logger/Logger.hpp"
+#include	"DGModule.hpp"
 
 
 using namespace std;
@@ -221,38 +222,82 @@ static short DGCALLBACK CntlDlgCallBack(short message, short dialID, short item,
 
 				break;
 			}
+			case Button_1:
+			{
+				//ShellExecute(0, 0, L"http://www.google.com", 0, 0, SW_SHOW);
+
+				break;
+			}
 			case SingleSelList_0:
 			{
 				short _id = DGListGetSelected(dialID, SingleSelList_0, DG_LIST_TOP);
+
 				try {
-					DisplayedProperty _prop = SETTINGS().GetFromPropertyList(_id);
+					DisplayedProperty _prop = *SETTINGS().GetCurrentlyEditedProperty(_id);
+					DGListSetDialItemOnTabField(dialID, SingleSelList_0, 2, _prop.GetOnTabType());
 
 					switch (_prop.GetOnTabType())
 					{
 					case CheckBox_0:
 					{
-						DGListSetTabItemIcon(dialID, SingleSelList_0, _id, 2, DG_LIST_CHECKEDICON);
+						//DGListSetTabItemIcon(dialID, SingleSelList_0, _id, 2, DG_LIST_CHECKEDICON);
 						break;
 					}
 					case RealEdit_0:
+					{
+						DGSetItemValDouble(dialID, RealEdit_0, _prop.AreAllValuesEqual ? _prop.value.singleVariant.variant.doubleValue : 0);
+
+						break;
+					}
+					case AngleEdit_0:
+					{
+						DGSetItemValDouble(dialID, AngleEdit_0, _prop.AreAllValuesEqual ? _prop.value.singleVariant.variant.doubleValue : 0);
+
+						break;
+					}
+					case LengthEdit_0:
+					{
+						DGSetItemValDouble(dialID, LengthEdit_0, _prop.AreAllValuesEqual ? _prop.value.singleVariant.variant.doubleValue : 0);
+
+						break;
+					}
+					case AreaEdit_0:
+					{
+						DGSetItemValDouble(dialID, AreaEdit_0, _prop.AreAllValuesEqual ? _prop.value.singleVariant.variant.doubleValue : 0);
+
+						break;
+					}
+					case VolumeEdit_0:
+					{
+						DGSetItemValDouble(dialID, VolumeEdit_0, _prop.AreAllValuesEqual ? _prop.value.singleVariant.variant.doubleValue : 0);
+
+						break;
+					}
 					case IntEdit_0:
+					{
+						DGSetItemValLong(dialID, IntEdit_0, _prop.AreAllValuesEqual ? _prop.value.singleVariant.variant.intValue : 0);
+
+						break;
+					}
 					case TextEdit_0:
 					{
-						DGListSetDialItemOnTabField(dialID, SingleSelList_0, 2, _prop.GetOnTabType());
-
 						DGSetItemText(dialID, TextEdit_0, _prop.AreAllValuesEqual ? _prop.toUniString() : "");
 
 						break;
 					}
 					case PopupControl_0:
 					{
-						DGListSetDialItemOnTabField(dialID, SingleSelList_0, 2, PopupControl_0);
 						DGPopUpDeleteItem(dialID, PopupControl_0, DG_ALL_ITEMS);
 
 						for (auto &_var : _prop.GetVariants())
 						{
 							DGPopUpInsertItem(dialID, PopupControl_0, DG_LIST_BOTTOM);
 							DGPopUpSetItemText(dialID, PopupControl_0, DG_LIST_BOTTOM, _var.sName);
+							if (_var.isSelected)
+							{
+								DGPopUpSetItemIcon(dialID, PopupControl_0, DG_LIST_BOTTOM, DG::Icon(ACAPI_GetOwnResModule(), 27101));
+								DGPopUpSelectItem(dialID, PopupControl_0, DG_LIST_BOTTOM);
+							}
 						}
 
 						break;
@@ -286,10 +331,61 @@ static short DGCALLBACK CntlDlgCallBack(short message, short dialID, short item,
 		switch (item)
 		{
 		case RealEdit_0:
+		{
+			*SETTINGS().GetCurrentlyEditedProperty() = DGGetItemValDouble(dialID, item);
+
+			break;
+		}
+		case AngleEdit_0:
+		{
+			*SETTINGS().GetCurrentlyEditedProperty() = DGGetItemValDouble(dialID, item);
+
+			break;
+		}
+		case LengthEdit_0:
+		{
+			*SETTINGS().GetCurrentlyEditedProperty() = DGGetItemValDouble(dialID, item);
+
+			break;
+		}
+		case AreaEdit_0:
+		{
+			*SETTINGS().GetCurrentlyEditedProperty() = DGGetItemValDouble(dialID, item);
+
+			break;
+		}
+		case VolumeEdit_0:
+		{
+			*SETTINGS().GetCurrentlyEditedProperty() = DGGetItemValDouble(dialID, item);
+
+			break;
+		}
 		case IntEdit_0:
+		{
+			*SETTINGS().GetCurrentlyEditedProperty() = DGGetItemValLong(dialID, item);
+
+			break;
+		}
 		case TextEdit_0:
 		{
-			SETTINGS().GetFromPropertyList() = DGGetItemText(dialID, item);
+			*SETTINGS().GetCurrentlyEditedProperty() = DGGetItemText(dialID, item);
+
+			break;
+		}
+		case PopupControl_0:
+		{
+			short _id = DGListGetSelected(dialID, SingleSelList_0, DG_LIST_TOP);
+			DisplayedProperty* _prop = SETTINGS().GetCurrentlyEditedProperty(_id);
+
+			short _i = DGPopUpGetSelected(dialID, item);
+
+			//auto _j = _prop->GetVariants()[_i - 1];
+
+			//auto _k = SETTINGS().GetCurrentlyEditedProperty();
+				
+			*SETTINGS().GetCurrentlyEditedProperty() = _prop->GetVariants()[_i - 1];
+
+			RefreshList(NULL);
 
 			break;
 		}
@@ -335,6 +431,7 @@ static short DGCALLBACK CntlDlgCallBack(short message, short dialID, short item,
 			break;
 		}
 		}
+
 		break;
 	}
 	case DG_MSG_GROW:
@@ -351,6 +448,7 @@ static short DGCALLBACK CntlDlgCallBack(short message, short dialID, short item,
 		DGMoveItem(dialID, PushRadio_1, 0, vgrow);
 		DGMoveItem(dialID, PushRadio_2, 0, vgrow);
 		DGMoveItem(dialID, PushRadio_3, 0, vgrow);
+		DGMoveItem(dialID, Button_1, 0, vgrow);
 		DGEndMoveGrowItems(dialID);
 		break;
 	}

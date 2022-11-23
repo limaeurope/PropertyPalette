@@ -16,6 +16,7 @@ typedef enum {
 	PushRadio_1,
 	PushRadio_2,
 	PushRadio_3,
+	Button_1,
 
 	TextEdit_1,
 	PopupControl_1,

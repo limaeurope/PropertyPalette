@@ -26,14 +26,14 @@ SettingsSingleton& SettingsSingleton::GetInstance()
 	return singleton;
 }
 
-DisplayedProperty SettingsSingleton::GetFromPropertyList(const short i_idx)
+DisplayedProperty* SettingsSingleton::GetCurrentlyEditedProperty(const short i_idx)
 {
 	if (!m_propIdx.ContainsKey(i_idx))
 		throw std::exception();
 
 	m_iPropCurrentlyEdited = &m_propIdx[i_idx];
 
-	return m_propIdx[i_idx];
+	return &m_propIdx[i_idx];
 }
 
 //S_PropertyGroup& SettingsSingleton::GetFromGroupList(const short i_idx)
@@ -52,6 +52,14 @@ void SettingsSingleton::SetFilterType(GS::UniString& i_sTypeFilter)
 		m_typeFilter = FT_Int;
 	else if (i_sTypeFilter == "Real")
 		m_typeFilter = FT_Real;
+	else if (i_sTypeFilter == "Area")
+		m_typeFilter = FT_Area;
+	else if (i_sTypeFilter == "Length")
+		m_typeFilter = FT_Length;
+	else if (i_sTypeFilter == "Area")
+		m_typeFilter = FT_Area;
+	else if (i_sTypeFilter == "Volume")
+		m_typeFilter = FT_Volume;
 	else if (i_sTypeFilter == "Boolean")
 		m_typeFilter = FT_Bool;
 	else if (i_sTypeFilter == "String")
