@@ -1,6 +1,7 @@
 #include "SettingsSingleton.hpp"
 #include "Utils/Utils.hpp"
 #include <exception>
+#include "WinReg/WinReg.hpp"
 
 SettingsSingleton& (*SETTINGS)() = SettingsSingleton::GetInstance;
 
@@ -10,7 +11,10 @@ SettingsSingleton::SettingsSingleton()
 	,m_logger					(Logger(m_companyName, m_appName))
 	,m_iPropCurrentlyEdited	(NULL)
 {
-	m_propertySelectMode = PSM_Intersection;
+	m_propertySelectMode	= PSM_Intersection;
+	m_typeFilter			= FT_None;
+	const wchar_t* _URL		= L"https://limadesignkft.sharepoint.com/sites/bim/BIM%20developer%20wiki/PropertyPalette.aspx";
+	m_HelpURL				= GetRegStringOrSetDefault(_URL, "HelpURL", "SOFTWARE\\" + GetCompanyName() + "\\" + GetAppName());
 }
 
 SettingsSingleton::~SettingsSingleton()

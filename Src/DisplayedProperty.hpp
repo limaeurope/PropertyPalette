@@ -31,6 +31,7 @@ public:
 	void operator= (const int i_value);
 	void operator= (const S_Variant i_var);
 	GS::Array<S_Variant>GetVariants() const;
+	inline bool IsEditable() { return definition.defaultValue.hasExpression && isDefault; };
 };
 
 bool operator== (const API_Variant& i_this, const API_Variant& i_other);

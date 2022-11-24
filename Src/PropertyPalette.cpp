@@ -3,6 +3,7 @@
 // *****************************************************************************
 
 // ---------------------------------- Includes ---------------------------------
+#define UNICODE
 
 #include	"APIEnvir.h"
 #include	"ACAPinc.h"					// also includes APIdefs.h
@@ -26,6 +27,8 @@
 //#include	<exception>
 //#include	"Logger/Logger.hpp"
 #include	"DGModule.hpp"
+#include <windows.h>
+#include <shellapi.h>
 
 
 using namespace std;
@@ -205,6 +208,8 @@ static short DGCALLBACK CntlDlgCallBack(short message, short dialID, short item,
 	switch (message){
 	case DG_MSG_INIT:
 	{
+		RefreshList(NULL);
+
 		break;
 	}
 	case DG_MSG_CLICK:
@@ -224,7 +229,7 @@ static short DGCALLBACK CntlDlgCallBack(short message, short dialID, short item,
 			}
 			case Button_1:
 			{
-				//ShellExecute(0, 0, L"http://www.google.com", 0, 0, SW_SHOW);
+				ShellExecute(0, 0, SETTINGS().GetHelpURL(), 0, 0, SW_SHOW);
 
 				break;
 			}
@@ -234,12 +239,17 @@ static short DGCALLBACK CntlDlgCallBack(short message, short dialID, short item,
 
 				try {
 					DisplayedProperty _prop = *SETTINGS().GetCurrentlyEditedProperty(_id);
+					if (!_prop.IsEditable())
+						return 0;
+
 					DGListSetDialItemOnTabField(dialID, SingleSelList_0, 2, _prop.GetOnTabType());
 
 					switch (_prop.GetOnTabType())
 					{
 					case CheckBox_0:
 					{
+						DGSetItemValLong(dialID, CheckBox_0, _prop.AreAllValuesEqual ? _prop.value.singleVariant.variant.boolValue ? 1 : 0 : 0);
+
 						//DGListSetTabItemIcon(dialID, SingleSelList_0, _id, 2, DG_LIST_CHECKEDICON);
 						break;
 					}
@@ -330,6 +340,12 @@ static short DGCALLBACK CntlDlgCallBack(short message, short dialID, short item,
 	{
 		switch (item)
 		{
+		case CheckBox_0:
+		{
+			*SETTINGS().GetCurrentlyEditedProperty() = DGGetItemValLong(dialID, item) ? true : false;
+
+			break;
+		}
 		case RealEdit_0:
 		{
 			*SETTINGS().GetCurrentlyEditedProperty() = DGGetItemValDouble(dialID, item);
@@ -448,7 +464,7 @@ static short DGCALLBACK CntlDlgCallBack(short message, short dialID, short item,
 		DGMoveItem(dialID, PushRadio_1, 0, vgrow);
 		DGMoveItem(dialID, PushRadio_2, 0, vgrow);
 		DGMoveItem(dialID, PushRadio_3, 0, vgrow);
-		DGMoveItem(dialID, Button_1, 0, vgrow);
+		//DGMoveItem(dialID, Button_1, 0, vgrow);
 		DGEndMoveGrowItems(dialID);
 		break;
 	}

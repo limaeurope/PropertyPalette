@@ -29,6 +29,7 @@ class SettingsSingleton
 	Logger										m_logger;
 	GS::UniString								m_sFilter;
 	TypeFilter									m_typeFilter;
+	GS::UniString								m_HelpURL;
 public:
 	static SettingsSingleton& GetInstance();
 	
@@ -50,6 +51,10 @@ public:
 	void SetFilterType(GS::UniString &  i_sTypeFilter);
 	inline void SetFilterType(TypeFilter & i_typeFilter) { m_typeFilter = i_typeFilter; }
 	inline TypeFilter GetFilterType() const { return m_typeFilter; };
+
+	inline GS::UniString GetAppName() const { return m_appName; };
+	inline GS::UniString GetCompanyName() const { return m_companyName; };
+	inline wchar_t* GetHelpURL() const { return (wchar_t*)m_HelpURL.ToUStr().Get(); };
 };
 
 static std::mutex _mutex;

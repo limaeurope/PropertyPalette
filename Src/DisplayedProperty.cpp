@@ -67,7 +67,17 @@ void DisplayedProperty::addExample(const API_Property& i_prop, const API_Guid& i
 GS::UniString DisplayedProperty::toUniString()
 {
 	GS::UniString result;
-	ACAPI_Property_GetPropertyValueString(*this, &result);
+
+	if (IsEditable())
+		return "<Expression>";
+
+	if (value.singleVariant.variant.type == API_PropertyBooleanValueType)
+		return value.singleVariant.variant.boolValue ? "True" : "False";
+
+	API_Property _p = *this;
+
+	GSErrCode err = ACAPI_Property_GetPropertyValueString(_p, &result);
+
 	return result;
 }
 
@@ -291,3 +301,4 @@ bool operator==(const API_Variant& i_this, const API_Variant& i_other)
 				return true;
 		}
 }
+
