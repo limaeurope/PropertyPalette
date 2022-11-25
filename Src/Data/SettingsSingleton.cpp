@@ -9,7 +9,7 @@ SettingsSingleton::SettingsSingleton()
 	:m_companyName				(GetStringFromResource_(32506, 1))
 	,m_appName					(GetStringFromResource_(32000, 1))
 	,m_logger					(Logger(m_companyName, m_appName))
-	,m_iPropCurrentlyEdited	(NULL)
+	,m_iPropCurrentlyEdited		(NULL)
 {
 	m_propertySelectMode	= PSM_Intersection;
 	m_typeFilter			= FT_None;
@@ -32,21 +32,86 @@ SettingsSingleton& SettingsSingleton::GetInstance()
 
 DisplayedProperty* SettingsSingleton::GetCurrentlyEditedProperty(const short i_idx)
 {
-	if (!m_propIdx.ContainsKey(i_idx))
+	//if (!m_propIdx.ContainsKey(i_idx))
+	//	throw std::exception();
+
+	//m_iPropCurrentlyEdited = &m_propIdx[i_idx];
+
+	//return &m_propIdx[i_idx];
+
+	if (!m_guidIdx.ContainsKey(i_idx))
 		throw std::exception();
 
-	m_iPropCurrentlyEdited = &m_propIdx[i_idx];
+	auto _guid = m_guidIdx[i_idx];
 
-	return &m_propIdx[i_idx];
+	auto _dp = static_cast<DisplayedProperty*>(m_rowIdx[_guid]);
+
+	m_iPropCurrentlyEdited = _dp;
+
+	return _dp;
 }
 
-//S_PropertyGroup& SettingsSingleton::GetFromGroupList(const short i_idx)
-//{
-//	if (!m_groupIdx.ContainsKey(i_idx))
-//		throw std::exception();
-//
-//	return m_groupIdx[i_idx];
-//}
+PropertyRow* SettingsSingleton::GetSelectedRow(const short i_idx)
+{
+	if (!m_guidIdx.ContainsKey(i_idx))
+		throw std::exception();
+
+	auto _guid = m_guidIdx[i_idx];
+
+	m_selectedRow = m_rowIdx[_guid];
+
+	return m_rowIdx[_guid];
+}
+
+PropertyRow* SettingsSingleton::GetFromRowList(const short i_idx)
+{
+	API_Guid _guid = GetFromGuidList(i_idx);
+
+	if (!m_rowIdx.ContainsKey(_guid))
+		throw std::exception();
+
+	return m_rowIdx[_guid];
+}
+
+PropertyRow* SettingsSingleton::GetFromRowList(const API_Guid i_guid)
+{
+	if (!m_rowIdx.ContainsKey(i_guid))
+		throw std::exception();
+
+	return m_rowIdx[i_guid];
+}
+
+PropertyRow* SettingsSingleton::AddOrUpdateLists(const short i_idx, PropertyRow* const i_row)
+{
+	API_Guid _guid = i_row->GetGuid();
+
+	if (m_rowIdx.ContainsKey(_guid))
+	{
+		auto _dp = dynamic_cast<DisplayedProperty*>(i_row);
+		if (_dp)
+			*dynamic_cast<API_Property*>(m_rowIdx[_guid]) = *dynamic_cast<API_Property*>(i_row);
+
+		auto _spg = dynamic_cast<S_PropertyGroup*>(i_row);
+		if (_spg)
+			*dynamic_cast<API_PropertyGroup*>(m_rowIdx[_guid]) = *dynamic_cast<API_PropertyGroup*>(i_row);
+	}
+	else
+	{
+		m_rowIdx.Put(_guid, i_row);
+	}
+
+	m_guidIdx.Put(i_idx, _guid);
+
+	return m_rowIdx[_guid];
+}
+
+API_Guid SettingsSingleton::GetFromGuidList(const short i_idx)
+{
+	if (!m_guidIdx.ContainsKey(i_idx))
+		throw std::exception();
+
+	return m_guidIdx[i_idx];
+}
 
 void SettingsSingleton::SetFilterType(GS::UniString& i_sTypeFilter)
 {

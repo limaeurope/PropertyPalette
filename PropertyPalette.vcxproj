@@ -228,6 +228,7 @@
     <ClCompile Include="..\CPPCommonLibs\Logger\Logger.cpp" />
     <ClCompile Include="..\CPPCommonLibs\Utils\Utils.cpp" />
     <ClCompile Include="..\CPPCommonLibs\WinReg\WinReg.cpp" />
+    <ClCompile Include="Src\Data\PropertyRow.cpp" />
     <ClCompile Include="Src\Data\SettingsSingleton.cpp" />
     <ClCompile Include="Src\$(ProjectName).cpp" />
     <ClCompile Include="Src\APICommon.c" />
@@ -305,6 +306,7 @@
     <ClInclude Include="..\CPPCommonLibs\Logger\LoglevelStrings.hpp" />
     <ClInclude Include="..\CPPCommonLibs\Utils\Utils.hpp" />
     <ClInclude Include="..\CPPCommonLibs\WinReg\WinReg.hpp" />
+    <ClInclude Include="Src\Data\PropertyRow.hpp" />
     <ClInclude Include="Src\Data\SettingsSingleton.hpp" />
     <ClInclude Include="Src\APICommon.h" />
     <ClInclude Include="Src\Data\S_PropertyGroup.hpp" />

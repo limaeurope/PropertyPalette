@@ -27,7 +27,7 @@
 //#include	<exception>
 //#include	"Logger/Logger.hpp"
 #include	"DGModule.hpp"
-#include <windows.h>
+//#include <windows.h>
 #include <shellapi.h>
 
 
@@ -65,11 +65,9 @@ void AddOrUpdateGroup(GS::HashTable<API_Guid, S_PropertyGroup>& i_groupS, API_Pr
 
 
 // -----------------------------------------------------------------------------
-// RefreshList
-//
-//  prints the recently selected element
+// RebuildList
 // -----------------------------------------------------------------------------
-static GSErrCode __ACENV_CALL RefreshList(const API_Neig* selElemNeig)
+static GSErrCode __ACENV_CALL RebuildList(const API_Neig* selElemNeig)
 {
 	UNUSED_PARAMETER(selElemNeig);
 	GSErrCode            err;
@@ -77,7 +75,7 @@ static GSErrCode __ACENV_CALL RefreshList(const API_Neig* selElemNeig)
 	GS::Array<API_Neig>  selNeigS;
 
 	GS::HashTable<API_Guid, S_PropertyGroup> groupS;
-	GS::HashTable< API_Guid, DisplayedProperty> collectedPropertieS;
+	GS::HashTable< API_Guid, DisplayedProperty*> collectedPropertieS;
 	GS::HashSet< API_Guid> collectedPropertieSSet;
 
 	bool isFirstElement = true;
@@ -99,9 +97,9 @@ static GSErrCode __ACENV_CALL RefreshList(const API_Neig* selElemNeig)
 		for (auto& prop : propertieS)
 		{
 			if (collectedPropertieS.ContainsKey(prop.definition.guid))
-				collectedPropertieS[prop.definition.guid].addExample(prop, selNeig.guid);
+				collectedPropertieS[prop.definition.guid]->addExample(prop, selNeig.guid);
 			else
-				collectedPropertieS.Add(prop.definition.guid, DisplayedProperty(prop, selNeig.guid));
+				collectedPropertieS.Add(prop.definition.guid, new DisplayedProperty(prop, selNeig.guid));
 
 			AddOrUpdateGroup(groupS, prop);
 
@@ -137,18 +135,18 @@ static GSErrCode __ACENV_CALL RefreshList(const API_Neig* selElemNeig)
 
 	GS::HashSet<API_Guid> collectedGuids;
 
-	for (auto& k : collectedPropertieS)
+	for (auto& v : collectedPropertieS.Values())
 		if	(	(	!SETTINGS().GetFilterText().GetLength()
-					||	k.value->definition.name.ToLowerCase().Contains(SETTINGS().GetFilterText()))
+					||	v->definition.name.ToLowerCase().Contains(SETTINGS().GetFilterText()))
 			&&	(	!SETTINGS().GetFilterType()
-					||	*(k.value) == SETTINGS().GetFilterType())
+					||	*(v) == SETTINGS().GetFilterType())
 			)
-			collectedGuids.Add(*k.key);
+			collectedGuids.Add(v->definition.guid);
 
 	collectedPropertieSSet.Intersect(collectedGuids);
 
 	for (auto& prop : collectedPropertieSSet)
-		AddOrUpdateGroup(groupS, collectedPropertieS[prop]);
+		AddOrUpdateGroup(groupS, *collectedPropertieS[prop]);
 
 	DGListDeleteItem(32400, SingleSelList_0, DG_ALL_ITEMS);
 
@@ -160,31 +158,39 @@ static GSErrCode __ACENV_CALL RefreshList(const API_Neig* selElemNeig)
 
 		_groupPropS.Intersect(group.value->propertieS);
 
-		if (_groupPropS.GetSize())
+		if (_groupPropS.GetSize()) 
 		{
 			DGListInsertItem(32400, SingleSelList_0, DG_LIST_BOTTOM);
 
 			DGListSetTabItemText(32400, SingleSelList_0, DG_LIST_BOTTOM, 1, group.value->name);
 			DGListSetItemBackgroundColor(32400, SingleSelList_0, DG_LIST_BOTTOM, 0xd8d8, 0xd8d8, 0xd8d8);
-			//SETTINGS().AddToGroupList(iDialogListPos++, *group.value);
-			iDialogListPos++;
+			//SETTINGS().AddToRowList(group.value->guid, group.value);
+			//SETTINGS().AddToGuidList(iDialogListPos++, group.value->guid);
+			SETTINGS().AddOrUpdateLists(iDialogListPos++, group.value);
 
-			if (group.value->GetVisibility())
+			if (group.value->GetDisplayItems())
 				for (auto& propGuid : _groupPropS)
 				{
-					DisplayedProperty dProp = collectedPropertieS[propGuid];
+					DisplayedProperty *dProp = collectedPropertieS[propGuid];
 
 					DGListInsertItem(32400, SingleSelList_0, DG_LIST_BOTTOM);
 
-					DGListSetTabItemText(32400, SingleSelList_0, DG_LIST_BOTTOM, 1, dProp.definition.name);
-					DGListSetTabItemText(32400, SingleSelList_0, DG_LIST_BOTTOM, 2, dProp.toUniString());
-					SETTINGS().AddToPropertyList(iDialogListPos++, dProp);
+					DGListSetTabItemText(32400, SingleSelList_0, DG_LIST_BOTTOM, 1, dProp->definition.name);
+					DGListSetTabItemText(32400, SingleSelList_0, DG_LIST_BOTTOM, 2, dProp->toUniString());
+
+					//SETTINGS().AddToRowList(dProp->definition.guid, dProp);
+					//SETTINGS().AddToGuidList(iDialogListPos++, dProp->definition.guid);
+					SETTINGS().AddOrUpdateLists(iDialogListPos++, dProp);
 				}
 		}
 	}
 
 	return NoError;
 }
+
+
+static GSErrCode __ACENV_CALL RefreshList()
+{}
 
 
 // ============================================================================
@@ -195,7 +201,7 @@ static GSErrCode __ACENV_CALL RefreshList(const API_Neig* selElemNeig)
 void	Do_SelectionMonitor(bool switchOn)
 {
 	if (switchOn)
-		ACAPI_Notify_CatchSelectionChange(RefreshList);
+		ACAPI_Notify_CatchSelectionChange(RebuildList);
 	else
 		ACAPI_Notify_CatchSelectionChange(nullptr);
 
@@ -208,7 +214,7 @@ static short DGCALLBACK CntlDlgCallBack(short message, short dialID, short item,
 	switch (message){
 	case DG_MSG_INIT:
 	{
-		RefreshList(NULL);
+		RebuildList(NULL);
 
 		break;
 	}
@@ -238,60 +244,47 @@ static short DGCALLBACK CntlDlgCallBack(short message, short dialID, short item,
 				short _id = DGListGetSelected(dialID, SingleSelList_0, DG_LIST_TOP);
 
 				try {
-					DisplayedProperty _prop = *SETTINGS().GetCurrentlyEditedProperty(_id);
-					if (!_prop.IsEditable())
+					PropertyRow* _pr = SETTINGS().GetSelectedRow(_id);
+					if (_pr->m_propertyType != PT_Property)
+						return 0;
+
+					DisplayedProperty _prop = *static_cast<DisplayedProperty*>(_pr);
+
+					if (_prop.HasExpression())
 						return 0;
 
 					DGListSetDialItemOnTabField(dialID, SingleSelList_0, 2, _prop.GetOnTabType());
 
-					switch (_prop.GetOnTabType())
+					OnTabTypes gott = _prop.GetOnTabType();
+
+					switch (gott)
 					{
 					case CheckBox_0:
 					{
-						DGSetItemValLong(dialID, CheckBox_0, _prop.AreAllValuesEqual ? _prop.value.singleVariant.variant.boolValue ? 1 : 0 : 0);
+						DGSetItemValLong(dialID, gott, _prop.AreAllValuesEqual ? _prop.value.singleVariant.variant.boolValue ? 1 : 0 : 0);
 
 						//DGListSetTabItemIcon(dialID, SingleSelList_0, _id, 2, DG_LIST_CHECKEDICON);
 						break;
 					}
 					case RealEdit_0:
-					{
-						DGSetItemValDouble(dialID, RealEdit_0, _prop.AreAllValuesEqual ? _prop.value.singleVariant.variant.doubleValue : 0);
-
-						break;
-					}
 					case AngleEdit_0:
-					{
-						DGSetItemValDouble(dialID, AngleEdit_0, _prop.AreAllValuesEqual ? _prop.value.singleVariant.variant.doubleValue : 0);
-
-						break;
-					}
 					case LengthEdit_0:
-					{
-						DGSetItemValDouble(dialID, LengthEdit_0, _prop.AreAllValuesEqual ? _prop.value.singleVariant.variant.doubleValue : 0);
-
-						break;
-					}
 					case AreaEdit_0:
-					{
-						DGSetItemValDouble(dialID, AreaEdit_0, _prop.AreAllValuesEqual ? _prop.value.singleVariant.variant.doubleValue : 0);
-
-						break;
-					}
 					case VolumeEdit_0:
 					{
-						DGSetItemValDouble(dialID, VolumeEdit_0, _prop.AreAllValuesEqual ? _prop.value.singleVariant.variant.doubleValue : 0);
+						DGSetItemValDouble(dialID, gott, _prop.AreAllValuesEqual ? _prop.value.singleVariant.variant.doubleValue : 0);
 
 						break;
 					}
 					case IntEdit_0:
 					{
-						DGSetItemValLong(dialID, IntEdit_0, _prop.AreAllValuesEqual ? _prop.value.singleVariant.variant.intValue : 0);
+						DGSetItemValLong(dialID, gott, _prop.AreAllValuesEqual ? _prop.value.singleVariant.variant.intValue : 0);
 
 						break;
 					}
 					case TextEdit_0:
 					{
-						DGSetItemText(dialID, TextEdit_0, _prop.AreAllValuesEqual ? _prop.toUniString() : "");
+						DGSetItemText(dialID, gott, _prop.AreAllValuesEqual ? _prop.toUniString() : "");
 
 						break;
 					}
@@ -317,11 +310,7 @@ static short DGCALLBACK CntlDlgCallBack(short message, short dialID, short item,
 					break;
 				}
 				catch (exception) {
-					//S_PropertyGroup _group = SETTINGS().GetFromGroupList(_id);
-
-					//_group.SetVisibility(!_group.GetVisibility());
-
-					//RefreshList(NULL);
+					RebuildList(NULL);
 				}
 			}
 
@@ -333,7 +322,7 @@ static short DGCALLBACK CntlDlgCallBack(short message, short dialID, short item,
 		}
 		catch (exception)
 		{
-
+			RebuildList(NULL);
 		}
 	}
 	case DG_MSG_CHANGE:
@@ -347,35 +336,10 @@ static short DGCALLBACK CntlDlgCallBack(short message, short dialID, short item,
 			break;
 		}
 		case RealEdit_0:
-		{
-			*SETTINGS().GetCurrentlyEditedProperty() = DGGetItemValDouble(dialID, item);
-
-			break;
-		}
 		case AngleEdit_0:
-		{
-			*SETTINGS().GetCurrentlyEditedProperty() = DGGetItemValDouble(dialID, item);
-
-			break;
-		}
 		case LengthEdit_0:
-		{
-			*SETTINGS().GetCurrentlyEditedProperty() = DGGetItemValDouble(dialID, item);
-
-			break;
-		}
 		case AreaEdit_0:
-		{
-			*SETTINGS().GetCurrentlyEditedProperty() = DGGetItemValDouble(dialID, item);
-
-			break;
-		}
 		case VolumeEdit_0:
-		{
-			*SETTINGS().GetCurrentlyEditedProperty() = DGGetItemValDouble(dialID, item);
-
-			break;
-		}
 		case IntEdit_0:
 		{
 			*SETTINGS().GetCurrentlyEditedProperty() = DGGetItemValLong(dialID, item);
@@ -395,13 +359,9 @@ static short DGCALLBACK CntlDlgCallBack(short message, short dialID, short item,
 
 			short _i = DGPopUpGetSelected(dialID, item);
 
-			//auto _j = _prop->GetVariants()[_i - 1];
-
-			//auto _k = SETTINGS().GetCurrentlyEditedProperty();
-				
 			*SETTINGS().GetCurrentlyEditedProperty() = _prop->GetVariants()[_i - 1];
 
-			RefreshList(NULL);
+			RebuildList(NULL);
 
 			break;
 		}
@@ -409,7 +369,7 @@ static short DGCALLBACK CntlDlgCallBack(short message, short dialID, short item,
 		{
 			SETTINGS().SetPropertySelectMode(PSM_Intersection);
 
-			RefreshList(NULL);
+			RebuildList(NULL);
 
 			break;
 		}
@@ -417,7 +377,7 @@ static short DGCALLBACK CntlDlgCallBack(short message, short dialID, short item,
 		{
 			SETTINGS().SetPropertySelectMode(PSM_Union);
 
-			RefreshList(NULL);
+			RebuildList(NULL);
 
 			break;
 		}
@@ -425,7 +385,7 @@ static short DGCALLBACK CntlDlgCallBack(short message, short dialID, short item,
 		{
 			SETTINGS().SetPropertySelectMode(PSM_LastAdded);
 
-			RefreshList(NULL);
+			RebuildList(NULL);
 
 			break;
 		}
@@ -433,7 +393,7 @@ static short DGCALLBACK CntlDlgCallBack(short message, short dialID, short item,
 		{
 			SETTINGS().SetFilterText(DGGetItemText(dialID, TextEdit_1));
 
-			RefreshList(NULL);
+			RebuildList(NULL);
 
 			break;
 		}
@@ -442,7 +402,27 @@ static short DGCALLBACK CntlDlgCallBack(short message, short dialID, short item,
 			TypeFilter _a = (TypeFilter)(DGGetItemValLong(dialID, PopupControl_1) - 1);
 			SETTINGS().SetFilterType(_a);
 
-			RefreshList(NULL);
+			RebuildList(NULL);
+
+			break;
+		}
+		}
+
+		break;
+	}
+	case DG_MSG_DOUBLECLICK:
+	{
+		switch (item)
+		{
+		case SingleSelList_0:
+		{
+			short _id = DGListGetSelected(dialID, SingleSelList_0, DG_LIST_TOP);
+
+			PropertyRow* _row = SETTINGS().GetFromRowList(_id);
+
+			_row->SetDisplayItems(!_row->GetDisplayItems());
+
+			RebuildList(NULL);
 
 			break;
 		}

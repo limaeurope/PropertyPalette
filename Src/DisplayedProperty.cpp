@@ -68,7 +68,7 @@ GS::UniString DisplayedProperty::toUniString()
 {
 	GS::UniString result;
 
-	if (IsEditable())
+	if (HasExpression())
 		return "<Expression>";
 
 	if (value.singleVariant.variant.type == API_PropertyBooleanValueType)
@@ -181,8 +181,11 @@ GS::Array<S_Variant> DisplayedProperty::GetVariants() const
 }
 
 DisplayedProperty::DisplayedProperty(const API_Property& i_prop, const API_Guid& i_guidObj)
-	: API_Property	(i_prop) 
+	: API_Property		(i_prop)
 {
+	SetDisplayItems(false);					//FIXME
+	m_propertyType	= PT_Property;
+
 	switch (definition.collectionType)
 	{
 	case API_PropertySingleCollectionType:
