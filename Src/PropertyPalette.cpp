@@ -47,7 +47,7 @@ static bool					isPopupInitialized = false;
 // ---------------------------------- Prototypes -------------------------------
 
 
-void AddOrUpdateGroup(GS::HashTable<API_Guid, S_PropertyGroup>& i_groupS, API_Property& i_prop)
+void AddOrUpdateGroup(GS::HashTable<API_Guid, S_PropertyGroup* >& i_groupS, API_Property& i_prop)
 {
 	if (!i_groupS.ContainsKey(i_prop.definition.groupGuid))
 	{
@@ -56,11 +56,11 @@ void AddOrUpdateGroup(GS::HashTable<API_Guid, S_PropertyGroup>& i_groupS, API_Pr
 
 		GSErrCode err = ACAPI_Property_GetPropertyGroup(group);
 
-		i_groupS.Add(i_prop.definition.groupGuid, S_PropertyGroup(group));
+		i_groupS.Add(i_prop.definition.groupGuid, new S_PropertyGroup(group));
 	}
 
-	if (!i_groupS[i_prop.definition.groupGuid].propertieS.Contains(i_prop.definition.guid))
-		i_groupS[i_prop.definition.groupGuid].propertieS.Add(i_prop.definition.guid);
+	if (!i_groupS[i_prop.definition.groupGuid]->propertieS.Contains(i_prop.definition.guid))
+		i_groupS[i_prop.definition.groupGuid]->propertieS.Add(i_prop.definition.guid);
 }
 
 
@@ -74,7 +74,7 @@ static GSErrCode __ACENV_CALL RebuildList(const API_Neig* selElemNeig)
 	API_SelectionInfo    selectionInfo;
 	GS::Array<API_Neig>  selNeigS;
 
-	GS::HashTable<API_Guid, S_PropertyGroup> groupS;
+	GS::HashTable<API_Guid, S_PropertyGroup*> groupS;
 	GS::HashTable< API_Guid, DisplayedProperty*> collectedPropertieS;
 	GS::HashSet< API_Guid> collectedPropertieSSet;
 
@@ -156,19 +156,19 @@ static GSErrCode __ACENV_CALL RebuildList(const API_Neig* selElemNeig)
 	{
 		GS::HashSet<API_Guid> _groupPropS{ collectedPropertieSSet };
 
-		_groupPropS.Intersect(group.value->propertieS);
+		_groupPropS.Intersect((*group.value)->propertieS);
 
 		if (_groupPropS.GetSize()) 
 		{
 			DGListInsertItem(32400, SingleSelList_0, DG_LIST_BOTTOM);
 
-			DGListSetTabItemText(32400, SingleSelList_0, DG_LIST_BOTTOM, 1, group.value->name);
+			DGListSetTabItemText(32400, SingleSelList_0, DG_LIST_BOTTOM, 1, (*group.value)->name);
 			DGListSetItemBackgroundColor(32400, SingleSelList_0, DG_LIST_BOTTOM, 0xd8d8, 0xd8d8, 0xd8d8);
-			//SETTINGS().AddToRowList(group.value->guid, group.value);
-			//SETTINGS().AddToGuidList(iDialogListPos++, group.value->guid);
-			SETTINGS().AddOrUpdateLists(iDialogListPos++, group.value);
+			SETTINGS().AddToRowList((*group.value)->guid, (*group.value));
+			SETTINGS().AddToGuidList(iDialogListPos++, (*group.value)->guid);
+			//SETTINGS().AddOrUpdateLists(iDialogListPos++, *group.value);
 
-			if (group.value->GetDisplayItems())
+			if ((*group.value)->GetDisplayItems())
 				for (auto& propGuid : _groupPropS)
 				{
 					DisplayedProperty *dProp = collectedPropertieS[propGuid];
@@ -178,9 +178,9 @@ static GSErrCode __ACENV_CALL RebuildList(const API_Neig* selElemNeig)
 					DGListSetTabItemText(32400, SingleSelList_0, DG_LIST_BOTTOM, 1, dProp->definition.name);
 					DGListSetTabItemText(32400, SingleSelList_0, DG_LIST_BOTTOM, 2, dProp->toUniString());
 
-					//SETTINGS().AddToRowList(dProp->definition.guid, dProp);
-					//SETTINGS().AddToGuidList(iDialogListPos++, dProp->definition.guid);
-					SETTINGS().AddOrUpdateLists(iDialogListPos++, dProp);
+					SETTINGS().AddToRowList(dProp->definition.guid, dProp);
+					SETTINGS().AddToGuidList(iDialogListPos++, dProp->definition.guid);
+					//SETTINGS().AddOrUpdateLists(iDialogListPos++, dProp);
 				}
 		}
 	}
@@ -301,6 +301,11 @@ static short DGCALLBACK CntlDlgCallBack(short message, short dialID, short item,
 								DGPopUpSetItemIcon(dialID, PopupControl_0, DG_LIST_BOTTOM, DG::Icon(ACAPI_GetOwnResModule(), 27101));
 								DGPopUpSelectItem(dialID, PopupControl_0, DG_LIST_BOTTOM);
 							}
+							else
+							{
+								DGPopUpSetItemIcon(dialID, PopupControl_0, DG_LIST_BOTTOM, DG::Icon(ACAPI_GetOwnResModule(), 27102));
+								DGPopUpSelectItem(dialID, PopupControl_0, DG_LIST_BOTTOM);
+							}
 						}
 
 						break;
@@ -342,13 +347,17 @@ static short DGCALLBACK CntlDlgCallBack(short message, short dialID, short item,
 		case VolumeEdit_0:
 		case IntEdit_0:
 		{
-			*SETTINGS().GetCurrentlyEditedProperty() = DGGetItemValLong(dialID, item);
+			short _id = DGListGetSelected(dialID, SingleSelList_0, DG_LIST_TOP);
+
+			*SETTINGS().GetCurrentlyEditedProperty(_id) = DGGetItemValLong(dialID, item);
 
 			break;
 		}
 		case TextEdit_0:
 		{
-			*SETTINGS().GetCurrentlyEditedProperty() = DGGetItemText(dialID, item);
+			short _id = DGListGetSelected(dialID, SingleSelList_0, DG_LIST_TOP);
+
+			*SETTINGS().GetCurrentlyEditedProperty(_id) = DGGetItemText(dialID, item);
 
 			break;
 		}
@@ -359,7 +368,11 @@ static short DGCALLBACK CntlDlgCallBack(short message, short dialID, short item,
 
 			short _i = DGPopUpGetSelected(dialID, item);
 
-			*SETTINGS().GetCurrentlyEditedProperty() = _prop->GetVariants()[_i - 1];
+			auto _variant = _prop->GetVariants()[_i - 1];
+
+			_variant.isSelected = !_variant.isSelected;
+
+			*SETTINGS().GetCurrentlyEditedProperty() = _variant;
 
 			RebuildList(NULL);
 
@@ -420,7 +433,9 @@ static short DGCALLBACK CntlDlgCallBack(short message, short dialID, short item,
 
 			PropertyRow* _row = SETTINGS().GetFromRowList(_id);
 
-			_row->SetDisplayItems(!_row->GetDisplayItems());
+			auto _ = _row->GetDisplayItems();
+
+			_row->SetDisplayItems(!_);
 
 			RebuildList(NULL);
 

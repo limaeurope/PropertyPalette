@@ -88,12 +88,14 @@ PropertyRow* SettingsSingleton::AddOrUpdateLists(const short i_idx, PropertyRow*
 	if (m_rowIdx.ContainsKey(_guid))
 	{
 		auto _dp = dynamic_cast<DisplayedProperty*>(i_row);
+		auto _dp2 = dynamic_cast<API_Property*>(m_rowIdx[_guid]);
 		if (_dp)
-			*dynamic_cast<API_Property*>(m_rowIdx[_guid]) = *dynamic_cast<API_Property*>(i_row);
+			*_dp2 = *_dp;
 
 		auto _spg = dynamic_cast<S_PropertyGroup*>(i_row);
+		auto _spg2 = dynamic_cast<API_PropertyGroup*>(m_rowIdx[_guid]);
 		if (_spg)
-			*dynamic_cast<API_PropertyGroup*>(m_rowIdx[_guid]) = *dynamic_cast<API_PropertyGroup*>(i_row);
+			*_spg2 = *_spg;
 	}
 	else
 	{

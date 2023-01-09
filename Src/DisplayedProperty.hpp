@@ -28,11 +28,11 @@ public:
 	inline OnTabTypes GetOnTabType() const { return m_onTabType; };
 	inline void SetOnTabType(const OnTabTypes i_onTabType) { m_onTabType = i_onTabType; };
 	operator GS::UniString () { return toUniString(); };
-	void operator= (const GS::UniString i_value);
+	void operator= (const GS::UniString& i_value);
 	void operator= (const bool i_value);
 	void operator= (const double i_value);
 	void operator= (const int i_value);
-	void operator= (const S_Variant i_var);
+	void operator= (const S_Variant& i_var);
 	GS::Array<S_Variant>GetVariants() const;
 	inline bool HasExpression() { return definition.defaultValue.hasExpression && isDefault; };
 	inline API_Guid GetGuid() { return definition.guid; };

@@ -81,12 +81,40 @@ GS::UniString DisplayedProperty::toUniString()
 	return result;
 }
 
-void DisplayedProperty::operator=(const GS::UniString i_value)
+void DisplayedProperty::operator=(const GS::UniString& i_value)
 {
 	isDefault = false;
-	value.variantStatus = API_VariantStatusNormal;
+	if (definition.collectionType != API_PropertyListCollectionType)
+	{ 
+		value.variantStatus = API_VariantStatusNormal;
 
-	this->value.singleVariant.variant.uniStringValue = i_value;
+		this->value.singleVariant.variant.uniStringValue = i_value;
+	}
+	else
+	{
+		Int16 _firstPrev = 0, _first = 0, _last = i_value.GetLength();
+		GS::UniString _what = ";", _val;
+		value.listVariant.variants.Clear();
+
+		do
+		{
+ 			_first = i_value.FindFirstIn(_what, _firstPrev, _last);
+
+			_val = i_value(_firstPrev, (_first != -1 ? _first : _last)- _firstPrev);
+			_val.Trim();
+
+			_firstPrev = _first + 1;
+
+			API_Variant _var;
+			_var.uniStringValue = _val;
+			_var.guidValue = API_Guid();
+			_var.type = API_PropertyStringValueType;
+
+			value.listVariant.variants.Push(_var);
+		}
+		while (_first > 0);
+	}
+
 
 	for (auto objGuid : representedObjectS)
 		GSErrCode err = ACAPI_Element_SetProperty(objGuid, *this);
@@ -125,7 +153,7 @@ void DisplayedProperty::operator=(const int i_value)
 		GSErrCode err = ACAPI_Element_SetProperty(objGuid, *this);
 }
 
-void DisplayedProperty::operator=(const S_Variant i_var)
+void DisplayedProperty::operator=(const S_Variant& i_var)
 {
 	isDefault = false;
 	value.variantStatus = API_VariantStatusNormal;
@@ -146,13 +174,20 @@ void DisplayedProperty::operator=(const S_Variant i_var)
 		auto _v = API_Variant();
 		_v.guidValue = i_var.guid;
 		_v.type = API_PropertyGuidValueType;
-		value.listVariant.variants.Push(_v);
-
+		if (i_var.isSelected)
+			value.listVariant.variants.Push(_v);
+		else 
+			for (UInt16 _i = 0; _i < value.listVariant.variants.GetSize(); _i++)
+				if (value.listVariant.variants[_i].guidValue == _v.guidValue)
+				{
+					value.listVariant.variants.Delete(_i);
+					break;
+				}
 		break;
 	}
 	}
 
-	for (auto objGuid : representedObjectS)
+	for (auto& objGuid : representedObjectS)
 		GSErrCode err = ACAPI_Element_SetProperty(objGuid, *this);
 }
 
@@ -248,13 +283,13 @@ DisplayedProperty::DisplayedProperty(const API_Property& i_prop, const API_Guid&
 		}
 		break;
 	}
-	case API_PropertyListCollectionType:
 	case API_PropertySingleChoiceEnumerationCollectionType:
 	case API_PropertyMultipleChoiceEnumerationCollectionType:
 	{
 		m_onTabType = PopupControl_0;
 		break;
 	}
+	case API_PropertyListCollectionType:
 	default:
 		m_onTabType = TextEdit_0;
 	}
